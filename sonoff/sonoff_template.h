@@ -194,6 +194,7 @@ enum SupportedModules {
   LUANIHVIO,
   KMC_70011,
   ARILUX,
+  XENON3,
   MAXMODULE };
 
 /********************************************************************************************/
@@ -248,7 +249,8 @@ const uint8_t kNiceList[MAXMODULE] PROGMEM = {
   KMC_70011,
   AILIGHT,
   WEMOS,
-  WITTY
+  WITTY,
+  XENON3
 };
 
 // Default module settings
@@ -739,6 +741,21 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
      GPIO_PWM3,        // GPIO13 RGB LED Blue
      GPIO_USER,        // GPIO14 RGBW LED White (optional - set to PWM4 for Cold White or Warm White)
      0, 0, 0
+  },
+  { "Xenon 3CH",      // Xenon 3CH (ESP8266)
+    0,0,0,
+    GPIO_KEY2,        // GPIO03 Serial TXD and Optional sensor
+    GPIO_REL2,        // GPIO04 Relay 2
+    GPIO_KEY3,        // GPIO05 Input 2
+    0, 0, 0,          // Flash connection
+    0,
+    0,
+    0,
+    GPIO_KEY1,        // GPIO12 Key input
+    GPIO_REL1,        // GPIO13 Relay 1
+    0,
+    GPIO_REL3,        // GPIO14 Relay 3
+    0, 0
   }
 };
 
