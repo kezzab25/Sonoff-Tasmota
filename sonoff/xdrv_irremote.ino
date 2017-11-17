@@ -67,8 +67,7 @@ void IrSendInit(void)
 #define IR_TIME_AVOID_DUPLICATE 500 // Milliseconds
 
 // Based on IRremoteESP8266.h enum decode_type_t
-const char kIrRemoteProtocols[] PROGMEM =
-  "UNKNOWN|RC5|RC6|NEC|SONY|PANASONIC|JVC|SAMSUNG|WHYNTER|AIWA_RC_T501|LG|SANYO|MITSUBISHI|DISH|SHARP";
+const char kIrRemoteProtocols[] PROGMEM = "UNKNOWN|RC5|RC6|NEC|SONY|PANASONIC|JVC|SAMSUNG|WHYNTER|AIWA_RC_T501|LG|SANYO|MITSUBISHI|DISH|SHARP";
 
 IRrecv *irrecv = NULL;
 unsigned long ir_lasttime = 0;
