@@ -150,6 +150,7 @@ enum ProgramSelectablePins {
   GPIO_ADC0,           // ADC
   GPIO_DI,             // my92x1 PWM input
   GPIO_DCKI,           // my92x1 CLK input
+  GPIO_ALIRFRCV,       // AliLux RF Receive input
   GPIO_USER,           // User configurable
   GPIO_MAX };
 
@@ -193,8 +194,9 @@ enum SupportedModules {
   MAGICHOME,
   LUANIHVIO,
   KMC_70011,
-  ARILUX,
+  ARILUX_LC01,
   XENON3,
+  ARILUX_LC11,
   MAXMODULE };
 
 /********************************************************************************************/
@@ -244,13 +246,14 @@ const uint8_t kNiceList[MAXMODULE] PROGMEM = {
   WION,
   H801,
   MAGICHOME,
-  ARILUX,
   HUAFAN_SS,
   KMC_70011,
   AILIGHT,
   WEMOS,
   WITTY,
-  XENON3
+  ARILUX_LC01,
+  XENON3,
+  ARILUX_LC11,
 };
 
 // Default module settings
@@ -733,8 +736,12 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
      0, 0, 0
   },
   { "Arilux",          // Arilux AL-LC01 (ESP8285) - https://www.banggood.com/nl/ARILUX-AL-LC01-Super-Mini-LED-WIFI-Smart-RGB-Controller-For-RGB-LED-Strip-Light-DC-9-12V-p-1058603.html
-     0, 0, 0, 0,       //  (PwmFrequency 1111Hz)
-     GPIO_USER,        // GPIO04 IR or RF receiver (optional)
+                       //  (PwmFrequency 1111Hz)
+     GPIO_KEY1,        // GPIO00 Optional Button
+     0,
+     GPIO_LED2_INV,    // GPIO02 RF receiver control
+     0,
+     GPIO_ALIRFRCV,    // GPIO04 IR or RF receiver (optional)
      GPIO_PWM1,        // GPIO05 RGB LED Red
      0, 0, 0, 0, 0, 0, // Flash connection
      GPIO_PWM2,        // GPIO12 RGB LED Green
@@ -756,6 +763,21 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
     0,
     GPIO_REL3,        // GPIO14 Relay 3
     0, 0
+  },
+  { "Arilux LC11",     // Arilux AL-LC11 (ESP8266) - https://www.banggood.com/nl/ARILUX-AL-LC11-Super-Mini-LED-WIFI-APP-Controller-RF-Remote-Control-For-RGBWW-LED-Strip-DC9-28V-p-1085112.html
+                       //  (PwmFrequency 540Hz)
+     GPIO_KEY1,        // GPIO00 Optional Button
+     0,
+     GPIO_LED2_INV,    // GPIO02 RF receiver control
+     0,
+     GPIO_PWM2,        // GPIO04 RGB LED Green
+     GPIO_PWM1,        // GPIO05 RGB LED Red
+     0, 0, 0, 0, 0, 0, // Flash connection
+     GPIO_PWM5,        // GPIO12 RGBCW LED Warm
+     GPIO_PWM4,        // GPIO13 RGBW LED Cold
+     GPIO_PWM3,        // GPIO14 RGB LED Blue
+     GPIO_ALIRFRCV,    // GPIO15 RF receiver input
+     0, 0
   }
 };
 
