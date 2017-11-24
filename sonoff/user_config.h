@@ -153,7 +153,7 @@
 #define APP_SLEEP              0                 // [Sleep] Sleep time to lower energy consumption (0 = Off, 1 - 250 mSec)
 
 #define KEY_HOLD_TIME          40                // [SetOption32] Number of 0.1 seconds to hold Button or external Pushbutton before sending HOLD message
-#define SWITCH_MODE            TOGGLE            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD or PUSHBUTTONHOLD_INV (the wall switch state)
+#define SWITCH_MODE            TOGGLE            // [SwitchMode] TOGGLE, FOLLOW, FOLLOW_INV, PUSHBUTTON, PUSHBUTTON_INV, PUSHBUTTONHOLD, PUSHBUTTONHOLD_INV or PUSHBUTTON_TOGGLE (the wall switch state)
 #define WS2812_LEDS            30                // [Pixels] Number of WS2812 LEDs to start with
 
 #define TEMP_CONVERSION        0                 // [SetOption8] Return temperature in (0 = Celsius or 1 = Fahrenheit)
@@ -165,7 +165,11 @@
 // -- Sensor code selection -----------------------
 #define USE_ADC_VCC                              // Display Vcc in Power status. Disable for use as Analog input on selected devices
 
+<<<<<<< HEAD
 #define USE_DS18x20                              // Optional for multiple DS18B20 and/or DS18S20 sensors using library OneWire (+2k code)
+=======
+//#define USE_DS18x20                              // Optional for more than one DS18B20 and/or DS18S20 sensors using library OneWire (+1.5k code)
+>>>>>>> refs/remotes/arendst/development
 
 #define USE_I2C                                  // I2C using library wire (+10k code, 0.2k mem) - Disable by //
   #define USE_SHT                                // Add I2C emulating code for SHT1X sensor

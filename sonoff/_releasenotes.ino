@@ -1,4 +1,24 @@
-/* 5.9.1f
+/* 5.9.1i
+ * Fix Arilux LC11 restart exception 0 after OTA upgrade
+ * Disabled CRC lookup-table in OneWire.h (#define ONEWIRE_CRC8_TABLE 0) to save some code space
+ * Rewrite xsns_05_ds18x20.ino adding support for DS1822, correct address calculation and force setting 12-bit resolution (#1222)
+ * DS18x20 sensor reconfiguration now only probed at restart removing dynamic connection and intermittent sensor loss (#1215)
+ *
+ * 5.9.1h
+ * Patch library I2Cdevlib-Core for esp8266-core 2.4.0-rc2
+ * Add option PUSHBUTTON_TOGGLE (SwitchMode 7) to allow toggling on any switch change (#1221)
+ * Fix DHT sensor timeout recognition by distinguish "signal already there" from "timeout" (#1233)
+ *
+ * 5.9.1g
+ * Fix typo ALIRFRCV into ARIRFRCV
+ * Add nicer clock support for larger hand widths
+ * Add better clock support for different pixel counts (#1226)
+ * Remove command EnergyReset 1..3
+ * Add commands EnergyReset1 0..42500, EnergyReset2 0..42500 and EnergyReset3 0..42500000
+ *  to (Re)set Energy Today, Yesterday or Total respectively in Wh (#406, #685, #1202)
+ * Add SettingsSaveAll routine to command SaveData to be used before controlled power down (#1202)
+ *
+ * 5.9.1f
  * Upgrade library ArduinoJson to 5.11.2
  * Upgrade library IRRemoteEsp8266 to 2.2.1 + 2 commits but tweaked some protocols to keep code usage small
  * Upgrade library NeoPixelBus to 2.2.9
