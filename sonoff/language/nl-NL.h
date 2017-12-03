@@ -64,6 +64,7 @@
 #define D_BRIGHTLIGHT "Fel"
 #define D_BUILDDATETIME "BuildDateTime"
 #define D_BUTTON "DrukKnop"
+#define D_BY "door"                  // Written by me
 #define D_CELSIUS "Celsius"
 #define D_CODE "code"                // Button code
 #define D_COLDLIGHT "Koud"
@@ -107,6 +108,7 @@
 #define D_HOST "Host"
 #define D_HOSTNAME "Hostnaam"
 #define D_HUMIDITY "Luchtvochtigheid"
+#define D_ID "Id"
 #define D_ILLUMINANCE "Verlichtingssterkte"
 #define D_IMMEDIATE "onmiddelijk"      // Button immediate
 #define D_INDEX "Index"
@@ -437,7 +439,7 @@
 #define D_ENERGY_YESTERDAY "Verbruik gisteren"
 #define D_ENERGY_TOTAL "Verbruik totaal"
 
-// xsns_05_ds18x20.ino
+// xsns_05_ds18b20.ino
 #define D_SENSOR_BUSY "Sensor bezet"
 #define D_SENSOR_CRC_ERROR "Sensor CRC fout"
 #define D_SENSORS_FOUND "Aantal sensoren"

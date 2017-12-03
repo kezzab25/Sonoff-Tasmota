@@ -64,8 +64,9 @@
 #define D_BRIGHTLIGHT "Jasny"
 #define D_BUILDDATETIME "ZbudowanoDataCzas"
 #define D_BUTTON "Przycisk"
+#define D_BY "by"                    // Written by me
 #define D_CELSIUS "Celsiusza"
-#define D_CODE "kod"                // Button code
+#define D_CODE "kod"                 // Button code
 #define D_COLDLIGHT "Zimny"
 #define D_COMMAND "Komenda"
 #define D_CONNECTED "Polaczony"
@@ -107,6 +108,7 @@
 #define D_HOST "Serwer"
 #define D_HOSTNAME "Nazwa serwera"
 #define D_HUMIDITY "Wilgotnosc"
+#define D_ID "ID"
 #define D_ILLUMINANCE "Oswietlenie"
 #define D_IMMEDIATE "Natychmiastowe"      // Button immediate
 #define D_INDEX "Indeks"
@@ -437,7 +439,7 @@
 #define D_ENERGY_YESTERDAY "Energia Wczoraj"
 #define D_ENERGY_TOTAL "Energia suma"
 
-// xsns_05_ds18x20.ino
+// xsns_05_ds18b20.ino
 #define D_SENSOR_BUSY "Czujnik DS18x20 zajety"
 #define D_SENSOR_CRC_ERROR "Czujnik DS18x20 blad CRC"
 #define D_SENSORS_FOUND "Znaleziono Czujnik DS18x20"

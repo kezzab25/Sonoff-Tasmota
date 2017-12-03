@@ -197,6 +197,7 @@ enum SupportedModules {
   ARILUX_LC01,
   XENON3,
   ARILUX_LC11,
+  SONOFF_DUAL_R2,
   MAXMODULE };
 
 /********************************************************************************************/
@@ -219,6 +220,7 @@ const uint8_t kNiceList[MAXMODULE] PROGMEM = {
   SONOFF_RF,
   SONOFF_TH,
   SONOFF_DUAL,
+  SONOFF_DUAL_R2,
   SONOFF_POW,
   SONOFF_4CH,
   SONOFF_4CHPRO,
@@ -778,6 +780,21 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
      GPIO_PWM3,        // GPIO14 RGB LED Blue
      GPIO_ARIRFRCV,    // GPIO15 RF receiver input
      0, 0
+  },
+  { "Sonoff Dual R2",  // Sonoff Dual R2 (ESP8285)
+     GPIO_USER,        // GPIO00 Button 0 on header (0 = On, 1 = Off)
+     GPIO_USER,        // GPIO01 Serial RXD and Optional sensor
+     0,
+     GPIO_USER,        // GPIO03 Serial TXD and Optional sensor
+     0,
+     GPIO_REL2,        // GPIO05 Relay 2 (0 = Off, 1 = On)
+     0, 0, 0,          // Flash connection
+     GPIO_USER,        // GPIO09 Button 1 on header (0 = On, 1 = Off)
+     GPIO_KEY1,        // GPIO10 Button on casing
+     0,                // Flash connection
+     GPIO_REL1,        // GPIO12 Relay 1 (0 = Off, 1 = On)
+     GPIO_LED1_INV,    // GPIO13 Blue Led (0 = On, 1 = Off)
+     0, 0, 0, 0
   }
 };
 
