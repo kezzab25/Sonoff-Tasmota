@@ -24,8 +24,8 @@
 enum UserSelectablePins {
   GPIO_NONE,           // Not used
   GPIO_DHT11,          // DHT11
-  GPIO_DHT21,          // DHT21, AM2301
-  GPIO_DHT22,          // DHT22, AM2302, AM2321
+  GPIO_DHT22,          // DHT21, DHT22, AM2301, AM2302, AM2321
+  GPIO_SI7021,         // iTead SI7021
   GPIO_DSB,            // Single wire DS18B20 or DS18S20
   GPIO_I2C_SCL,        // I2C SCL
   GPIO_I2C_SDA,        // I2C SDA
@@ -78,6 +78,8 @@ enum UserSelectablePins {
   GPIO_LED2_INV,
   GPIO_LED3_INV,
   GPIO_LED4_INV,
+  GPIO_MHZ_TXD,
+  GPIO_MHZ_RXD,
   GPIO_SENSOR_END };
 
 // Text in webpage Module Parameters and commands GPIOS and GPIO
@@ -85,7 +87,7 @@ const char kSensors[GPIO_SENSOR_END][9] PROGMEM = {
   D_SENSOR_NONE,
   D_SENSOR_DHT11,
   D_SENSOR_AM2301,
-  D_SENSOR_DHT22,
+  D_SENSOR_SI7021,
   D_SENSOR_DS18X20,
   D_SENSOR_I2C_SCL,
   D_SENSOR_I2C_SDA,
@@ -137,7 +139,9 @@ const char kSensors[GPIO_SENSOR_END][9] PROGMEM = {
   D_SENSOR_LED "1i",
   D_SENSOR_LED "2i",
   D_SENSOR_LED "3i",
-  D_SENSOR_LED "4i"
+  D_SENSOR_LED "4i",
+  D_SENSOR_MHZ_TX,
+  D_SENSOR_MHZ_RX
 };
 
 // Programmer selectable GPIO functionality offset by user selectable GPIOs
