@@ -94,11 +94,6 @@ void DomoticzMqttUpdate()
   }
 }
 
-void DomoticzSetUpdateTimer(uint16_t value)
-{
-  domoticz_update_timer = value;
-}
-
 void DomoticzMqttSubscribe()
 {
   uint8_t maxdev = (devices_present > MAX_DOMOTICZ_IDX) ? MAX_DOMOTICZ_IDX : devices_present;
@@ -224,7 +219,7 @@ boolean DomoticzCommand()
       if (XdrvMailbox.payload >= 0) {
         Settings.domoticz_switch_idx[XdrvMailbox.index -1] = XdrvMailbox.payload;
       }
-      snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_DOMOTICZ_COMMAND_INDEX_NVALUE, command, XdrvMailbox.index, Settings.domoticz_key_idx[XdrvMailbox.index -1]);
+      snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_DOMOTICZ_COMMAND_INDEX_NVALUE, command, XdrvMailbox.index, Settings.domoticz_switch_idx[XdrvMailbox.index -1]);
     }
     else if ((CMND_SENSORIDX == command_code) && (XdrvMailbox.index > 0) && (XdrvMailbox.index <= DZ_MAX_SENSORS)) {
       if (XdrvMailbox.payload >= 0) {
@@ -398,6 +393,7 @@ void DomoticzSaveSettings()
     ssensor_indices, Settings.domoticz_update_timer);
   AddLog(LOG_LEVEL_INFO);
 }
+#endif  // USE_WEBSERVER
 
 /*********************************************************************************************\
  * Interface
@@ -417,6 +413,9 @@ boolean Xdrv05(byte function)
       case FUNC_MQTT_SUBSCRIBE:
         DomoticzMqttSubscribe();
         break;
+      case FUNC_MQTT_INIT:
+        domoticz_update_timer = 2;
+        break;
       case FUNC_MQTT_DATA:
         result = DomoticzMqttData();
         break;
@@ -431,5 +430,4 @@ boolean Xdrv05(byte function)
   return result;
 }
 
-#endif  // USE_WEBSERVER
 #endif  // USE_DOMOTICZ
