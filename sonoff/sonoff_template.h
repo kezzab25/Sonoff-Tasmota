@@ -835,7 +835,7 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
      GPIO_REL3,        // GPIO15 Relay 3
      0, 0
   }
-
+  /*
   { "PowStro Basic",   // PowStro (ESP8266) - (#1419)
      0, 0, 0, 0,
      GPIO_REL1,        // GPIO04 Relay (0 = Off, 1 = On)
