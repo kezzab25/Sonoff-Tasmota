@@ -195,13 +195,6 @@
 //  #define USE_INA219                             // Add I2C code for INA219 Low voltage and current sensor (+1k code)
 #endif  // USE_I2C
 
-//#define USE_SPI                                  // SPI using library TasmotaTFT
-#ifdef USE_SPI
-  #ifndef USE_DISPLAY
-  #define USE_DISPLAY                            // Add SPI Display support for 320x240 and 480x320 TFT
-  #endif
-#endif  // USE_SPI
-
 // -- Serial sensors ------------------------------
 #define USE_MHZ19                                // Add support for MH-Z19 CO2 sensor (+2k code)
 #define USE_SENSEAIR                             // Add support for SenseAir K30, K70 and S8 CO2 sensor (+2k3 code)
