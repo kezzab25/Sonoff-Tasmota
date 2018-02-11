@@ -52,19 +52,11 @@
 #define WIFI_SUBNETMASK        "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
 #define WIFI_DNS               "192.168.1.1"    // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
 
-<<<<<<< HEAD
 #define STA_SSID1              "NETWORK5.0"      // [Ssid1] Wifi SSID
 #define STA_PASS1              "shinymango547"   // [Password1] Wifi password
 #define STA_SSID2              "NETWORK6.0"      // [Ssid2] Optional alternate AP Wifi SSID
 #define STA_PASS2              "shinymango547"   // [Password2] Optional alternate AP Wifi password
 #define WIFI_CONFIG_TOOL       WIFI_SMARTCONFIG  // [WifiConfig] Default tool if wifi fails to connect
-=======
-#define STA_SSID1              ""                // [Ssid1] Wifi SSID
-#define STA_PASS1              ""                // [Password1] Wifi password
-#define STA_SSID2              ""                // [Ssid2] Optional alternate AP Wifi SSID
-#define STA_PASS2              ""                // [Password2] Optional alternate AP Wifi password
-#define WIFI_CONFIG_TOOL       WIFI_WPSCONFIG    // [WifiConfig] Default tool if wifi fails to connect
->>>>>>> refs/remotes/arendst/development
                                                  //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT)
 
 // -- Syslog --------------------------------------
@@ -75,11 +67,7 @@
 #define WEB_LOG_LEVEL          LOG_LEVEL_INFO    // [WebLog]
 
 // -- Ota -----------------------------------------
-<<<<<<< HEAD
 #define OTA_URL                "http://voipotago.co.nz:80/api/arduino/firmware.bin"  // [OtaUrl]
-=======
-#define OTA_URL                "http://sonoff.maddox.co.uk/tasmota/sonoff.ino.bin"  // [OtaUrl]
->>>>>>> refs/remotes/arendst/development
 
 // -- MQTT ----------------------------------------
 #define MQTT_USE               1                 // [SetOption3] Select default MQTT use (0 = Off, 1 = On)
@@ -94,11 +82,7 @@
   #define MQTT_USER            "cloudmqttuser"      // [MqttUser] Mandatory user
   #define MQTT_PASS            "cloudmqttpassword"  // [MqttPassword] Mandatory password
 #else
-<<<<<<< HEAD
   #define MQTT_HOST            "192.168.88.90"          // [MqttHost]
-=======
-  #define MQTT_HOST            ""                // [MqttHost]
->>>>>>> refs/remotes/arendst/development
   #define MQTT_PORT            1883              // [MqttPort] MQTT port (10123 on CloudMQTT)
   #define MQTT_USER            ""       // [MqttUser] Optional user
   #define MQTT_PASS            ""       // [MqttPassword] Optional password
