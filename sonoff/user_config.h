@@ -36,6 +36,7 @@
 //#define MY_LANGUAGE            it-IT           // Italian in Italy
 //#define MY_LANGUAGE            nl-NL           // Dutch in the Netherlands
 //#define MY_LANGUAGE            pl-PL           // Polish in Poland
+//#define MY_LANGUAGE            ru-RU           // Russian in Russia
 //#define MY_LANGUAGE            zh-CN           // Chinese (Simplified) in China
 
 // -- Project -------------------------------------
@@ -190,10 +191,13 @@
 //    #define USE_BME680                           // Add additional support for BME680 sensor using Adafruit Sensor and BME680 libraries (+6k code)
   #define USE_BH1750                             // Add I2C code for BH1750 sensor (+0k5 code)
 //  #define USE_VEML6070                           // Add I2C code for VEML6070 sensor (+0k5 code)
-//  #define USE_TSL2561                            // Add I2C code for TSL2561 sensor using library Adafruit TSL2561 Arduino (+1k2 code)
+//  #define USE_TSL2561                            // Add I2C code for TSL2561 sensor using library Adafruit TSL2561 Arduino (+1k4 code)
+//  #define USE_TSL2561_JOBA                       // Add I2C code for TSL2561 sensor using library Joba_Tsl2561 (+2k3 code)
 //  #define USE_ADS1115                            // Add I2C code for ADS1115 16 bit A/D converter based on Adafruit ADS1x15 library (no library needed) (+0k7 code)
 //  #define USE_ADS1115_I2CDEV                     // Add I2C code for ADS1115 16 bit A/D converter using library i2cdevlib-Core and i2cdevlib-ADS1115 (+2k code)
 //  #define USE_INA219                             // Add I2C code for INA219 Low voltage and current sensor (+1k code)
+//  #define USE_MGS                                // Add I2C code for Xadow and Grove Mutichannel Gas sensor using library Multichannel_Gas_Sensor (+10k code)
+    #define MGS_SENSOR_ADDR    0x04              // Default Mutichannel Gas sensor i2c address
 #endif  // USE_I2C
 
 // -- Serial sensors ------------------------------

@@ -50,6 +50,10 @@
 #define MTX_ADDRESS8           0
 #endif
 
+#ifndef HOME_ASSISTANT_DISCOVERY_ENABLE
+#define HOME_ASSISTANT_DISCOVERY_ENABLE 0
+#endif
+
 /*********************************************************************************************\
  * RTC memory
 \*********************************************************************************************/
@@ -154,6 +158,7 @@ extern "C" {
 
 extern "C" uint32_t _SPIFFS_end;
 
+// From libraries/EEPROM/EEPROM.cpp EEPROMClass
 #define SPIFFS_END          ((uint32_t)&_SPIFFS_end - 0x40200000) / SPI_FLASH_SEC_SIZE
 
 // Version 3.x config
