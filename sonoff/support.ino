@@ -17,8 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-IPAddress syslog_host_addr;  // Syslog host IP address
-unsigned long syslog_host_refresh = 0;
+IPAddress syslog_host_addr;      // Syslog host IP address
+uint32_t syslog_host_hash = 0;   // Syslog host name hash
 
 /*********************************************************************************************\
  * Watchdog extension (https://github.com/esp8266/Arduino/issues/1532)
@@ -414,6 +414,15 @@ void SetSerialBaudrate(int baudrate)
   }
 }
 
+uint32_t GetHash(const char *buffer, size_t size)
+{
+  uint32_t hash = 0;
+  for (uint16_t i = 0; i <= size; i++) {
+    hash += (uint8_t)*buffer++ * (i +1);
+  }
+  return hash;
+}
+
 /*********************************************************************************************\
  * Wifi
 \*********************************************************************************************/
@@ -549,10 +558,11 @@ void WifiBegin(uint8_t flag)
 
 #ifdef ARDUINO_ESP8266_RELEASE_2_3_0  // (!strncmp_P(ESP.getSdkVersion(),PSTR("1.5.3"),5))
   AddLog_P(LOG_LEVEL_DEBUG, S_LOG_WIFI, PSTR(D_PATCH_ISSUE_2186));
-  WiFi.mode(WIFI_OFF);    // See https://github.com/esp8266/Arduino/issues/2186
+  WiFi.mode(WIFI_OFF);      // See https://github.com/esp8266/Arduino/issues/2186
 #endif
 
-  WiFi.disconnect();
+  WiFi.disconnect(true);    // Delete SDK wifi config
+  delay(200);
   WiFi.mode(WIFI_STA);      // Disable AP mode
   if (Settings.sleep) {
     WiFi.setSleepMode(WIFI_LIGHT_SLEEP);  // Allow light sleep during idle times
@@ -688,6 +698,7 @@ void WifiCheck(uint8_t param)
         if (WIFI_SMARTCONFIG == wifi_config_type) {
           WiFi.stopSmartConfig();
         }
+        SettingsSdkErase();
         restart_flag = 2;
       }
     } else {
@@ -1245,7 +1256,7 @@ void RtcSecond()
   uint32_t dstoffset;
   TIME_T tmpTime;
 
-  if ((ntp_sync_minute > 59) && (3 == RtcTime.minute)) ntp_sync_minute = 1;                // If sync prepare for a new cycle
+  if ((ntp_sync_minute > 59) && (RtcTime.minute > 2)) ntp_sync_minute = 1;                 // If sync prepare for a new cycle
   uint8_t offset = (uptime < 30) ? RtcTime.second : (((ESP.getChipId() & 0xF) * 3) + 3) ;  // First try ASAP to sync. If fails try once every 60 seconds based on chip id
   if ((WL_CONNECTED == WiFi.status()) && (offset == RtcTime.second) && ((RtcTime.year < 2016) || (ntp_sync_minute == RtcTime.minute))) {
     ntp_time = sntp_get_current_timestamp();
@@ -1396,9 +1407,9 @@ void Syslog()
   // Destroys log_data
   char syslog_preamble[64];  // Hostname + Id
 
-  if ((static_cast<uint32_t>(syslog_host_addr) == 0) || ((millis() - syslog_host_refresh) > 60000)) {
-    WiFi.hostByName(Settings.syslog_host, syslog_host_addr);
-    syslog_host_refresh = millis();
+  if (syslog_host_hash != GetHash(Settings.syslog_host, strlen(Settings.syslog_host))) {
+    syslog_host_hash = GetHash(Settings.syslog_host, strlen(Settings.syslog_host));
+    WiFi.hostByName(Settings.syslog_host, syslog_host_addr);  // If sleep enabled this might result in exception so try to do it once using hash
   }
   if (PortUdp.beginPacket(syslog_host_addr, Settings.syslog_port)) {
     snprintf_P(syslog_preamble, sizeof(syslog_preamble), PSTR("%s ESP-"), my_hostname);
