@@ -472,7 +472,18 @@ void SettingsDefaultSet2()
   Settings.webserver = WEB_SERVER;
   Settings.weblog_level = WEB_LOG_LEVEL;
 
-  strlcpy(Settings.mqtt_fingerprint, MQTT_FINGERPRINT, sizeof(Settings.mqtt_fingerprint));
+  char fingerprint[60];
+  strlcpy(fingerprint, MQTT_FINGERPRINT1, sizeof(fingerprint));
+  char *p = fingerprint;
+  for (byte i = 0; i < 20; i++) {
+    Settings.mqtt_fingerprint[0][i] = strtol(p, &p, 16);
+  }
+  strlcpy(fingerprint, MQTT_FINGERPRINT2, sizeof(fingerprint));
+  p = fingerprint;
+  for (byte i = 0; i < 20; i++) {
+    Settings.mqtt_fingerprint[1][i] = strtol(p, &p, 16);
+  }
+
   strlcpy(Settings.mqtt_host, MQTT_HOST, sizeof(Settings.mqtt_host));
   Settings.mqtt_port = MQTT_PORT;
   strlcpy(Settings.mqtt_client, MQTT_CLIENT_ID, sizeof(Settings.mqtt_client));
@@ -568,6 +579,7 @@ void SettingsDefaultSet2()
 
   // 5.8.0
   Settings.light_pixels = WS2812_LEDS;
+//  Settings.light_rotation = 0;
 
   // 5.8.1
 //  Settings.altitude = 0;
@@ -586,7 +598,6 @@ void SettingsDefaultSet2()
 
 void SettingsDefaultSet_3_2_4()
 {
-  Settings.ws_pixels = WS2812_LEDS;
   Settings.ws_red = 255;
   Settings.ws_green = 0;
   Settings.ws_blue = 0;
@@ -614,6 +625,7 @@ void SettingsDefaultSet_3_9_3()
   }
 
   Settings.light_pixels = WS2812_LEDS;
+  Settings.light_rotation = 0;
   for (byte i = 0; i < MAX_PWMS; i++) {
     Settings.light_color[i] = 255;
   }
@@ -824,7 +836,7 @@ void SettingsDelta()
         }
       }
       if (!Settings.light_pixels && cfg_wsflg) {
-        Settings.light_pixels = Settings.ws_pixels;
+        Settings.light_pixels = WS2812_LEDS;
         Settings.light_color[0] = Settings.ws_red;
         Settings.light_color[1] = Settings.ws_green;
         Settings.light_color[2] = Settings.ws_blue;
@@ -875,7 +887,16 @@ void SettingsDelta()
     if (Settings.version < 0x050B0107) {
       Settings.flag.not_power_linked = 0;
     }
-
+    if (Settings.version < 0x050C0005) {
+      Settings.light_rotation = 0;
+      char fingerprint[60];
+      memcpy(fingerprint, Settings.mqtt_fingerprint, sizeof(fingerprint));
+      char *p = fingerprint;
+      for (byte i = 0; i < 20; i++) {
+        Settings.mqtt_fingerprint[0][i] = strtol(p, &p, 16);
+        Settings.mqtt_fingerprint[1][i] = Settings.mqtt_fingerprint[0][i];
+      }
+    }
 
     Settings.version = VERSION;
     SettingsSave(1);

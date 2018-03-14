@@ -25,7 +25,7 @@
     - Select IDE Tools - Flash Size: "1M (no SPIFFS)"
   ====================================================*/
 
-#define VERSION                0x050C0004   // 5.12.0d
+#define VERSION                0x050C0005   // 5.12.0e
 
 // Location specific includes
 #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
@@ -513,7 +513,7 @@ void MqttDataHandler(char* topic, byte* data, unsigned int data_len)
         Settings.pulse_timer[index -1] = payload16;  // 0 - 65535
         pulse_timer[index -1] = 0;
       }
-      snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_NVALUE, command, index, Settings.pulse_timer[index -1]);
+      snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE, command, index, Settings.pulse_timer[index -1], pulse_timer[index -1]);
     }
     else if (CMND_BLINKTIME == command_code) {
       if ((payload > 2) && (payload <= 3600)) {

@@ -32,6 +32,9 @@
 
 //#define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
 
+// HTML (ISO 639-1) Language Code
+#define D_HTML_LANGUAGE "hu"
+
 // "2017-03-07T11:08:02" - ISO8601:2004
 #define D_YEAR_MONTH_SEPARATOR "."
 #define D_MONTH_DAY_SEPARATOR "."
@@ -161,13 +164,6 @@
 #define D_RECEIVED_TOPIC "Érkezett Téma"
 #define D_DATA_SIZE "Adat Méret"
 #define D_ANALOG_INPUT "Analóg"
-
-#define D_FINGERPRINT "TLS fingerprint hitelesítése..."
-#define D_TLS_CONNECT_FAILED_TO "TLS Csatlakozás sikertelen a"
-#define D_RETRY_IN "Újrapróbálás"
-#define D_VERIFIED "Hitelesítve"
-#define D_INSECURE "Nem biztonságos kapcsolat érvénytelen Fingerprint miatt"
-#define D_CONNECT_FAILED_TO "Sikertelen csatlakozás a"
 
 // support.ino
 #define D_OSWATCH "osWatch"
@@ -317,6 +313,14 @@
 #define D_ENABLE_WEBLOG_FOR_RESPONSE "Engedélyezz 2-es weblogolást több információért"
 #define D_NEED_USER_AND_PASSWORD "Kell felhasználó=<felhasználónév>&jelszó=<jelszó>"
 
+// xdrv_00_mqtt.ino
+#define D_FINGERPRINT "TLS fingerprint hitelesítése..."
+#define D_TLS_CONNECT_FAILED_TO "TLS Csatlakozás sikertelen a"
+#define D_RETRY_IN "Újrapróbálás"
+#define D_VERIFIED "Hitelesítve Fingerprint"
+#define D_INSECURE "Nem biztonságos kapcsolat érvénytelen Fingerprint miatt"
+#define D_CONNECT_FAILED_TO "Sikertelen csatlakozás a"
+
 // xdrv_wemohue.ino
 #define D_MULTICAST_DISABLED "Multicast kikapcsolva"
 #define D_MULTICAST_REJOINED "Multicast (újra)csatlakozás"
@@ -348,9 +352,9 @@
   #define D_DOMOTICZ_TEMP_HUM_BARO "Hőm,Párat,Légny"
   #define D_DOMOTICZ_POWER_ENERGY "Teljesítmény,Energia"
   #define D_DOMOTICZ_ILLUMINANCE "Fényerő"
-  #define D_DOMOTICZ_COUNT "Szám"
-  #define D_DOMOTICZ_VOLTAGE "Feszültség"
-  #define D_DOMOTICZ_CURRENT "Áram"
+  #define D_DOMOTICZ_COUNT "Szám/PM1"
+  #define D_DOMOTICZ_VOLTAGE "Feszültség/PM2.5"
+  #define D_DOMOTICZ_CURRENT "Áram/PM10"
   #define D_DOMOTICZ_AIRQUALITY "Légminőség"
 #define D_DOMOTICZ_UPDATE_TIMER "Update időzítő"
 
