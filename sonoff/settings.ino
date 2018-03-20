@@ -457,6 +457,7 @@ void SettingsDefaultSet2()
   Settings.save_data = SAVE_DATA;
   Settings.timezone = APP_TIMEZONE;
   strlcpy(Settings.ota_url, OTA_URL, sizeof(Settings.ota_url));
+  Settings.baudrate = APP_BAUDRATE / 1200;
 
   Settings.seriallog_level = SERIAL_LOG_LEVEL;
 //  Settings.sta_active = 0;
@@ -509,7 +510,7 @@ void SettingsDefaultSet2()
 //    Settings.domoticz_switch_idx[i] = 0;
   }
 
-  Settings.energy_power_delta = 80;
+  Settings.energy_power_delta = DEFAULT_POWER_DELTA;
   Settings.energy_power_calibration = HLW_PREF_PULSE;
   Settings.energy_voltage_calibration = HLW_UREF_PULSE;
   Settings.energy_current_calibration = HLW_IREF_PULSE;
@@ -890,7 +891,7 @@ void SettingsDelta()
     }
     if (Settings.version < 0x050C0005) {
       Settings.light_rotation = 0;
-      Settings.energy_power_delta = 80;
+      Settings.energy_power_delta = DEFAULT_POWER_DELTA;
       char fingerprint[60];
       memcpy(fingerprint, Settings.mqtt_fingerprint, sizeof(fingerprint));
       char *p = fingerprint;
@@ -898,6 +899,9 @@ void SettingsDelta()
         Settings.mqtt_fingerprint[0][i] = strtol(p, &p, 16);
         Settings.mqtt_fingerprint[1][i] = Settings.mqtt_fingerprint[0][i];
       }
+    }
+    if (Settings.version < 0x050C0007) {
+      Settings.baudrate = APP_BAUDRATE / 1200;
     }
 
     Settings.version = VERSION;
