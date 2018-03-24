@@ -73,6 +73,7 @@
 
 // -- Ota -----------------------------------------
 #define OTA_URL                "http://voipotago.co.nz:80/api/arduino/firmware.bin"  // [OtaUrl]
+#define USE_ARDUINO_OTA                          // Add optional support for Arduino OTA (+4k5 code)
 
 /*********************************************************************************************\
  * Select ONE of possible MQTT library types below
@@ -161,6 +162,8 @@
 #define NTP_SERVER2            "nl.pool.ntp.org"    // [NtpServer2] Select second NTP server by name or IP address (5.39.184.5)
 #define NTP_SERVER3            "0.nl.pool.ntp.org"  // [NtpServer3] Select third NTP server by name or IP address (93.94.224.67)
 
+#define USE_TIMERS                               // Add support for up to 16 timers (+2k2 code)
+
 // -- Time - Start Daylight Saving Time and timezone offset from UTC in minutes
 //#define TIME_DST               North, Last, Sun, Mar, 2, +120  // Northern Hemisphere, Last sunday in march at 02:00 +120 minutes
 
@@ -215,13 +218,13 @@
 #endif  // USE_I2C
 
 // -- Serial sensors ------------------------------
-#define USE_MHZ19                                // Add support for MH-Z19 CO2 sensor (+2k code)
-#define USE_SENSEAIR                             // Add support for SenseAir K30, K70 and S8 CO2 sensor (+2k3 code)
-  #define CO2_LOW              800               // Below this CO2 value show green light (needs PWM or WS2812 RG(B) led and enable with SetOption18 1)
-  #define CO2_HIGH             1200              // Above this CO2 value show red light (needs PWM or WS2812 RG(B) led and enable with SetOption18 1)
-#define USE_PMS5003                              // Add support for PMS5003 and PMS7003 particle concentration sensor (+1k3 code)
-#define USE_NOVA_SDS                             // Add support for SDS011 and SDS021 particle concentration sensor (+0k7 code)
-#define USE_PZEM004T                             // Add support for PZEM004T Energy monitor (+2k code)
+//#define USE_MHZ19                                // Add support for MH-Z19 CO2 sensor (+2k code)
+//#define USE_SENSEAIR                             // Add support for SenseAir K30, K70 and S8 CO2 sensor (+2k3 code)
+//  #define CO2_LOW              800               // Below this CO2 value show green light (needs PWM or WS2812 RG(B) led and enable with SetOption18 1)
+//  #define CO2_HIGH             1200              // Above this CO2 value show red light (needs PWM or WS2812 RG(B) led and enable with SetOption18 1)
+//#define USE_PMS5003                              // Add support for PMS5003 and PMS7003 particle concentration sensor (+1k3 code)
+//#define USE_NOVA_SDS                             // Add support for SDS011 and SDS021 particle concentration sensor (+0k7 code)
+//#define USE_PZEM004T                             // Add support for PZEM004T Energy monitor (+2k code)
 #define USE_SERIAL_BRIDGE                        // Add support for software Serial Bridge (+0k8 code)
 
 // -- Low level interface devices -----------------
@@ -234,12 +237,6 @@
 //  #define USE_WS2812_DMA                         // DMA supports only GPIO03 (= Serial RXD) (+1k mem). When USE_WS2812_DMA is enabled expect Exceptions on Pow
 
 //#define USE_ARILUX_RF                            // Add support for Arilux RF remote controller (+0k8 code, 252 iram (non 2.3.0))
-
-/*********************************************************************************************\
- * Select all sensors - overrides above undefines!!
-\*********************************************************************************************/
-
-//#define USE_ALL_SENSORS                          // Create sonoff-xxl with all sensors enabled (See sonoff_post.h for selected sensors)
 
 /*********************************************************************************************\
  * Select all sensors - overrides above undefines!!

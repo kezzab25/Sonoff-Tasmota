@@ -25,7 +25,7 @@
     - Select IDE Tools - Flash Size: "1M (no SPIFFS)"
   ====================================================*/
 
-#define VERSION                0x050C0008   // 5.12.0h
+#define VERSION                0x050C0009   // 5.12.0i
 
 // Location specific includes
 #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
@@ -54,8 +54,14 @@
   #include <ESP8266WebServer.h>             // WifiManager, Webserver
   #include <DNSServer.h>                    // WifiManager
 #endif  // USE_WEBSERVER
+#ifdef USE_ARDUINO_OTA
+  #include <ArduinoOTA.h>                   // Arduino OTA
+  #ifndef USE_DISCOVERY
+  #define USE_DISCOVERY
+  #endif
+#endif  // USE_ARDUINO_OTA
 #ifdef USE_DISCOVERY
-  #include <ESP8266mDNS.h>                  // MQTT, Webserver
+  #include <ESP8266mDNS.h>                  // MQTT, Webserver, Arduino OTA
 #endif  // USE_DISCOVERY
 #ifdef USE_I2C
   #include <Wire.h>                         // I2C support library
@@ -176,7 +182,6 @@ uint8_t i2c_flg = 0;                        // I2C configured
 uint8_t spi_flg = 0;                        // SPI configured
 uint8_t light_type = 0;                     // Light types
 bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
-
 boolean mdns_begun = false;
 
 char my_version[33];                        // Composed version string
@@ -1237,6 +1242,7 @@ void ExecuteCommand(char *cmnd)
 void PublishStatus(uint8_t payload)
 {
   uint8_t option = 1;
+  char stemp[MAX_FRIENDLYNAMES * (sizeof(Settings.friendlyname[0]) +4)];
 
   // Workaround MQTT - TCP/IP stack queueing when SUB_PREFIX = PUB_PREFIX
   if (!strcmp(Settings.mqtt_prefix[0],Settings.mqtt_prefix[1]) && (!payload)) option++;
@@ -1245,8 +1251,13 @@ void PublishStatus(uint8_t payload)
   if (!energy_flg && (9 == payload)) payload = 99;
 
   if ((0 == payload) || (99 == payload)) {
-    snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("{\"" D_CMND_STATUS "\":{\"" D_CMND_MODULE "\":%d,\"" D_CMND_FRIENDLYNAME "\":\"%s\",\"" D_CMND_TOPIC "\":\"%s\",\"" D_CMND_BUTTONTOPIC "\":\"%s\",\"" D_CMND_POWER "\":%d,\"" D_CMND_POWERONSTATE "\":%d,\"" D_CMND_LEDSTATE "\":%d,\"" D_CMND_SAVEDATA "\":%d,\"" D_JSON_SAVESTATE "\":%d,\"" D_CMND_BUTTONRETAIN "\":%d,\"" D_CMND_POWERRETAIN "\":%d}}"),
-      Settings.module +1, Settings.friendlyname[0], mqtt_topic, Settings.button_topic, power, Settings.poweronstate, Settings.ledstate, Settings.save_data, Settings.flag.save_state, Settings.flag.mqtt_button_retain, Settings.flag.mqtt_power_retain);
+    uint8_t maxfn = (devices_present > MAX_FRIENDLYNAMES) ? MAX_FRIENDLYNAMES : devices_present;
+    stemp[0] = '\0';
+    for (byte i = 0; i < maxfn; i++) {
+      snprintf_P(stemp, sizeof(stemp), PSTR("%s%s\"%s\"" ), stemp, (i > 0 ? "," : ""), Settings.friendlyname[i]);
+    }
+    snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("{\"" D_CMND_STATUS "\":{\"" D_CMND_MODULE "\":%d,\"" D_CMND_FRIENDLYNAME "\":[%s],\"" D_CMND_TOPIC "\":\"%s\",\"" D_CMND_BUTTONTOPIC "\":\"%s\",\"" D_CMND_POWER "\":%d,\"" D_CMND_POWERONSTATE "\":%d,\"" D_CMND_LEDSTATE "\":%d,\"" D_CMND_SAVEDATA "\":%d,\"" D_JSON_SAVESTATE "\":%d,\"" D_CMND_BUTTONRETAIN "\":%d,\"" D_CMND_POWERRETAIN "\":%d}}"),
+      Settings.module +1, stemp, mqtt_topic, Settings.button_topic, power, Settings.poweronstate, Settings.ledstate, Settings.save_data, Settings.flag.save_state, Settings.flag.mqtt_button_retain, Settings.flag.mqtt_power_retain);
     MqttPublishPrefixTopic_P(option, PSTR(D_CMND_STATUS));
   }
 
@@ -1263,8 +1274,8 @@ void PublishStatus(uint8_t payload)
   }
 
   if ((0 == payload) || (3 == payload)) {
-    snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("{\"" D_CMND_STATUS D_STATUS3_LOGGING "\":{\"" D_CMND_SERIALLOG "\":%d,\"" D_CMND_WEBLOG "\":%d,\"" D_CMND_SYSLOG "\":%d,\"" D_CMND_LOGHOST "\":\"%s\",\"" D_CMND_LOGPORT "\":%d,\"" D_CMND_SSID "1\":\"%s\",\"" D_CMND_SSID "2\":\"%s\",\"" D_CMND_TELEPERIOD "\":%d,\"" D_CMND_SETOPTION "\":\"%08X\"}}"),
-      Settings.seriallog_level, Settings.weblog_level, Settings.syslog_level, Settings.syslog_host, Settings.syslog_port, Settings.sta_ssid[0], Settings.sta_ssid[1], Settings.tele_period, Settings.flag.data);
+    snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("{\"" D_CMND_STATUS D_STATUS3_LOGGING "\":{\"" D_CMND_SERIALLOG "\":%d,\"" D_CMND_WEBLOG "\":%d,\"" D_CMND_SYSLOG "\":%d,\"" D_CMND_LOGHOST "\":\"%s\",\"" D_CMND_LOGPORT "\":%d,\"" D_CMND_SSID "\":[\"%s\",\"%s\"],\"" D_CMND_TELEPERIOD "\":%d,\"" D_CMND_SETOPTION "\":[\"%08X\",\"%08X\"]}}"),
+      Settings.seriallog_level, Settings.weblog_level, Settings.syslog_level, Settings.syslog_host, Settings.syslog_port, Settings.sta_ssid[0], Settings.sta_ssid[1], Settings.tele_period, Settings.flag.data, Settings.flag2.data);
     MqttPublishPrefixTopic_P(option, PSTR(D_CMND_STATUS "3"));
   }
 
@@ -1897,6 +1908,86 @@ void StateLoop()
   }
 }
 
+#ifdef USE_ARDUINO_OTA
+/*********************************************************************************************\
+ * Allow updating via the Arduino OTA-protocol.
+ *
+ * - Once started disables current wifi clients and udp
+ * - Perform restart when done to re-init wifi clients
+\*********************************************************************************************/
+
+bool arduino_ota_triggered = false;
+uint16_t arduino_ota_progress_dot_count = 0;
+
+void ArduinoOTAInit()
+{
+  ArduinoOTA.setPort(8266);
+  ArduinoOTA.setHostname(Settings.hostname);
+  if (Settings.web_password[0] !=0) ArduinoOTA.setPassword(Settings.web_password);
+
+  ArduinoOTA.onStart([]()
+  {
+    SettingsSave(1);  // Free flash for OTA update
+#ifdef USE_WEBSERVER
+    if (Settings.webserver) StopWebserver();
+#endif  // USE_WEBSERVER
+#ifdef USE_ARILUX_RF
+    AriluxRfDisable();  // Prevent restart exception on Arilux Interrupt routine
+#endif  // USE_ARILUX_RF
+    if (Settings.flag.mqtt_enabled) MqttDisconnect();
+    snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_UPLOAD "Arduino OTA " D_UPLOAD_STARTED));
+    AddLog(LOG_LEVEL_INFO);
+    arduino_ota_triggered = true;
+    arduino_ota_progress_dot_count = 0;
+    delay(100);       // Allow time for message xfer
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+  {
+    if ((LOG_LEVEL_DEBUG <= seriallog_level)) {
+      arduino_ota_progress_dot_count++;
+      Serial.printf(".");
+      if (!(arduino_ota_progress_dot_count % 80)) Serial.println();
+    }
+  });
+
+  ArduinoOTA.onError([](ota_error_t error)
+  {
+    /*
+    From ArduinoOTA.h:
+    typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
+    */
+    char error_str[100];
+
+    if ((LOG_LEVEL_DEBUG <= seriallog_level) && arduino_ota_progress_dot_count) Serial.println();
+    switch (error) {
+      case OTA_BEGIN_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
+      case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
+      case OTA_END_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
+      default:
+        snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
+    }
+    snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_UPLOAD "Arduino OTA  %s. " D_RESTARTING), error_str);
+    AddLog(LOG_LEVEL_INFO);
+    delay(100);       // Allow time for message xfer
+    ESP.restart();
+  });
+
+  ArduinoOTA.onEnd([]()
+  {
+    if ((LOG_LEVEL_DEBUG <= seriallog_level)) Serial.println();
+    snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_UPLOAD "Arduino OTA " D_SUCCESSFUL ". " D_RESTARTING));
+    AddLog(LOG_LEVEL_INFO);
+    delay(100);       // Allow time for message xfer
+    ESP.restart();
+	});
+
+  ArduinoOTA.begin();
+  snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_UPLOAD "Arduino OTA " D_ENABLED " " D_PORT " 8266"));
+  AddLog(LOG_LEVEL_INFO);
+}
+#endif  // USE_ARDUINO_OTA
+
 /********************************************************************************************/
 
 void SerialInput()
@@ -2305,6 +2396,11 @@ void setup()
 #endif  // BE_MINIMAL
 
   RtcInit();
+
+#ifdef USE_ARDUINO_OTA
+  ArduinoOTAInit();
+#endif  // USE_ARDUINO_OTA
+
   XsnsCall(FUNC_INIT);
 }
 
@@ -2325,6 +2421,12 @@ void loop()
   if (millis() >= state_loop_timer) StateLoop();
 
   SerialInput();
+
+#ifdef USE_ARDUINO_OTA
+  ArduinoOTA.handle();
+  // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
+  while (arduino_ota_triggered) ArduinoOTA.handle();
+#endif  // USE_ARDUINO_OTA
 
 //  yield();     // yield == delay(0), delay contains yield, auto yield in loop
   delay(sleep);  // https://github.com/esp8266/Arduino/issues/2021
