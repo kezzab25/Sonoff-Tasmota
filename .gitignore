@@ -13,3 +13,4 @@
 .vscode
 sonoff/user_config_override.h
 .vscode/launch.json
+.vscode/.browse.c_cpp.db*
