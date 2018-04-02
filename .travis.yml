@@ -20,4 +20,4 @@ deploy:
   file: ".pioenvs/*.bin"
   skip_cleanup: true
   on:
-    tags: true
+    repo: kezzab25/Sonoff-Tasmota
