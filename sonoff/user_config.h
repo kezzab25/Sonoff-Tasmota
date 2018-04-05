@@ -48,6 +48,9 @@
                                                  //   As an IDE restriction it needs to be the same as the main .ino file
 
 #define CFG_HOLDER             0x20161209        // [Reset 1] Change this value to load following default configuration parameters
+
+//#define USE_CONFIG_OVERRIDE                      // Uncomment to use your own user_config_override.h file. See README.md
+
 #define SAVE_DATA              1                 // [SaveData] Save changed parameters to Flash (0 = disable, 1 - 3600 seconds)
 #define SAVE_STATE             0                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
 
@@ -164,6 +167,9 @@
 
 #define USE_TIMERS                               // Add support for up to 16 timers (+2k2 code)
   #define USE_TIMERS_WEB                         // Add timer webpage support (+4k5 code)
+  #define USE_SUNRISE                            // Add support for Sunrise and sunset tools (+16k)
+    #define LATITUDE           48.858360         // [Latitude] Your location to be used with sunrise and sunset
+    #define LONGITUDE          2.294442          // [Longitude] Your location to be used with sunrise and sunset
 
 // -- Time - Start Daylight Saving Time and timezone offset from UTC in minutes
 //#define TIME_DST               North, Last, Sun, Mar, 2, +120  // Northern Hemisphere, Last sunday in march at 02:00 +120 minutes
