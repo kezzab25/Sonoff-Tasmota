@@ -48,6 +48,7 @@
 
 // -- Project -------------------------------------
 #define PROJECT                "sonoff"          // PROJECT is used as the default topic delimiter
+#define MODULE                 SONOFF_BASIC      // [Module] Select default model from sonoff_template.h (Should not be changed)
 
 #define SAVE_DATA              1                 // [SaveData] Save changed parameters to Flash (0 = disable, 1 - 3600 seconds)
 #define SAVE_STATE             0                 // [SetOption0] Save changed power state to Flash (0 = disable, 1 = enable)
@@ -176,6 +177,7 @@
 //#define MY_LANGUAGE            it-IT           // Italian in Italy
 //#define MY_LANGUAGE            nl-NL           // Dutch in the Netherlands
 //#define MY_LANGUAGE            pl-PL           // Polish in Poland
+//#define MY_LANGUAGE            pt-BR           // Portuguese in Brazil
 //#define MY_LANGUAGE            pt-PT           // Portuguese in Portugal
 //#define MY_LANGUAGE            ru-RU           // Russian in Russia
 //#define MY_LANGUAGE            zh-CN           // Chinese (Simplified) in China
