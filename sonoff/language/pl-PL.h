@@ -33,6 +33,7 @@
 
 //#define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
 
+#define LANGUAGE_LCID 1045
 // HTML (ISO 639-1) Language Code
 #define D_HTML_LANGUAGE "pl"
 
@@ -43,7 +44,7 @@
 #define D_HOUR_MINUTE_SEPARATOR ":"
 #define D_MINUTE_SECOND_SEPARATOR ":"
 
-#define D_DAY3LIST "PonWtoŚroCzwPiąSobNie"
+#define D_DAY3LIST "NiePonWtoŚroCzwPiąSob"
 #define D_MONTH3LIST "StyLutMarKwiMajCzeLipSieWrzPaźLisGru"
 
 // Non JSON decimal separator
@@ -91,6 +92,7 @@
 #define D_FALSE "Fałsz"
 #define D_FILE "Plik"
 #define D_FREE_MEMORY "Wolna pamięć"
+#define D_FREQUENCY "Frequency"
 #define D_GAS "Gas"
 #define D_GATEWAY "Brama"
 #define D_GROUP "Grupa"
@@ -101,6 +103,7 @@
 #define D_IMMEDIATE "Natychmiastowe"      // Button immediate
 #define D_INDEX "Indeks"
 #define D_INFO "Informacja"
+#define D_INFRARED "Infrared"
 #define D_INITIALIZED "Zainicjowany"
 #define D_IP_ADDRESS "Adres IP"
 #define D_LIGHT "Światło"
@@ -119,6 +122,9 @@
 #define D_PORT "Port"
 #define D_POWER_FACTOR "Współczynik mocy"
 #define D_POWERUSAGE "Moc"
+#define D_POWERUSAGE_ACTIVE "Active Power"
+#define D_POWERUSAGE_APPARENT "Apparent Power"
+#define D_POWERUSAGE_REACTIVE "Reactive Power"
 #define D_PRESSURE "Ciśnienie"
 #define D_PRESSUREATSEALEVEL "Ciśnienie na poziomie morza"
 #define D_PROGRAM_FLASH_SIZE "Wielkość programu flash"
@@ -154,6 +160,7 @@
 #define D_UPTIME "Uptime"
 #define D_USER "Użytkownik"
 #define D_UTC_TIME "UTC"
+#define D_UV_INDEX "UV Index"
 #define D_UV_LEVEL "Poziom UV"
 #define D_VERSION "Wersja"
 #define D_VOLTAGE "Napięcie"
@@ -394,6 +401,7 @@
 #define D_KNX_COMMAND_OTHER "Other"
 #define D_SENT_TO "sent to"
 #define D_KNX_WARNING "The group address ( 0 / 0 / 0 ) is reserved and can not be used."
+#define D_KNX_ENHANCEMENT "Communication Enhancement"
 
 // xdrv_03_energy.ino
 #define D_ENERGY_TODAY "Energia Dzisiaj"
@@ -453,10 +461,15 @@
 #define D_SENSOR_SBR_TX   "SerBr Tx"
 #define D_SENSOR_SR04_TRIG "SR04 Tri"
 #define D_SENSOR_SR04_ECHO "SR04 Ech"
+#define D_SENSOR_SDM120_TX "SDM120 Tx"
+#define D_SENSOR_SDM120_RX "SDM120 Rx"
+#define D_SENSOR_SDM630_TX "SDM630 Tx"
+#define D_SENSOR_SDM630_RX "SDM630 Rx"
 
 // Units
 #define D_UNIT_AMPERE "A"
 #define D_UNIT_CENTIMETER "cm"
+#define D_UNIT_HERTZ "Hz"
 #define D_UNIT_HOUR "Godz"
 #define D_UNIT_KILOOHM "kOhm"
 #define D_UNIT_KILOWATTHOUR "kWh"
@@ -473,6 +486,8 @@
 #define D_UNIT_PRESSURE "hPa"
 #define D_UNIT_SECOND "sec"
 #define D_UNIT_SECTORS "sektory"
+#define D_UNIT_VA "VA"
+#define D_UNIT_VAR "VAr"
 #define D_UNIT_VOLT "V"
 #define D_UNIT_WATT "W"
 #define D_UNIT_WATTHOUR "Wh"

@@ -33,6 +33,7 @@
 
 //#define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
 
+#define LANGUAGE_LCID 1046
 // HTML (ISO 639-1) Language Code
 #define D_HTML_LANGUAGE "pt"
 
@@ -91,6 +92,7 @@
 #define D_FALSE "Falso"
 #define D_FILE "Arquivo"
 #define D_FREE_MEMORY "Memória Livre"
+#define D_FREQUENCY "Frequency"
 #define D_GAS "Gás"
 #define D_GATEWAY "Gateway"
 #define D_GROUP "Grupo"
@@ -101,6 +103,7 @@
 #define D_IMMEDIATE "Imediato"      // Button immediate
 #define D_INDEX "Índice"
 #define D_INFO "Informação"
+#define D_INFRARED "Infrared"
 #define D_INITIALIZED "Inicializado"
 #define D_IP_ADDRESS "Endereço IP"
 #define D_LIGHT "Luz"
@@ -119,6 +122,9 @@
 #define D_PORT "Porta"
 #define D_POWER_FACTOR "Fator de potência"
 #define D_POWERUSAGE "Potência"
+#define D_POWERUSAGE_ACTIVE "Active Power"
+#define D_POWERUSAGE_APPARENT "Apparent Power"
+#define D_POWERUSAGE_REACTIVE "Reactive Power"
 #define D_PRESSURE "Pressão"
 #define D_PRESSUREATSEALEVEL "Pressão ao nível do mar"
 #define D_PROGRAM_FLASH_SIZE "Tamanho do programa na memória"
@@ -154,6 +160,7 @@
 #define D_UPTIME "Tempo de atividade"
 #define D_USER "Usuário"
 #define D_UTC_TIME "UTC"
+#define D_UV_INDEX "Índice UV"
 #define D_UV_LEVEL "Nível UV"
 #define D_VERSION "Versão"
 #define D_VOLTAGE "Voltagem"
@@ -394,6 +401,7 @@
 #define D_KNX_COMMAND_OTHER "Outros"
 #define D_SENT_TO "Enviar para"
 #define D_KNX_WARNING "O endereço ( 0 / 0 / 0 ) é reservado e não pode ser usado."
+#define D_KNX_ENHANCEMENT "Communication Enhancement"
 
 // xdrv_03_energy.ino
 #define D_ENERGY_TODAY "Consumo energético de hoje"
@@ -453,10 +461,15 @@
 #define D_SENSOR_SBR_TX   "SerBr Tx"
 #define D_SENSOR_SR04_TRIG "SR04 Tri"
 #define D_SENSOR_SR04_ECHO "SR04 Ech"
+#define D_SENSOR_SDM120_TX "SDM120 Tx"
+#define D_SENSOR_SDM120_RX "SDM120 Rx"
+#define D_SENSOR_SDM630_TX "SDM630 Tx"
+#define D_SENSOR_SDM630_RX "SDM630 Rx"
 
 // Units
 #define D_UNIT_AMPERE "A"
 #define D_UNIT_CENTIMETER "cm"
+#define D_UNIT_HERTZ "Hz"
 #define D_UNIT_HOUR "H"
 #define D_UNIT_KILOOHM "kOhm"
 #define D_UNIT_KILOWATTHOUR "kWh"
@@ -473,6 +486,8 @@
 #define D_UNIT_PRESSURE "hPa"
 #define D_UNIT_SECOND "s"
 #define D_UNIT_SECTORS "setores"
+#define D_UNIT_VA "VA"
+#define D_UNIT_VAR "VAr"
 #define D_UNIT_VOLT "V"
 #define D_UNIT_WATT "W"
 #define D_UNIT_WATTHOUR "W/h"

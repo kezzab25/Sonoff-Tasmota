@@ -408,6 +408,8 @@ void CseEverySecond()
  *
  * Source: Victor Ferrer https://github.com/vicfergar/Sonoff-MQTT-OTA-Arduino
  * Based on: PZEM004T library https://github.com/olehs/PZEM004T
+ *
+ * Hardware Serial will be selected if GPIO1 = [PZEM Rx] and [GPIO3 = PZEM Tx]
 \*********************************************************************************************/
 
 #include <TasmotaSerial.h>
@@ -433,6 +435,8 @@ TasmotaSerial *PzemSerial;
 #define RESP_POWER_ALARM (uint8_t)0xA5
 
 #define PZEM_DEFAULT_READ_TIMEOUT 500
+
+/*********************************************************************************************/
 
 struct PZEMCommand {
   uint8_t command;
@@ -562,12 +566,6 @@ void PzemEvery200ms()
   else {
     pzem_sendRetry--;
   }
-}
-
-bool PzemInit()
-{
-  PzemSerial = new TasmotaSerial(pin[GPIO_PZEM_RX], pin[GPIO_PZEM_TX]);
-  return PzemSerial->begin();
 }
 
 /********************************************************************************************/
@@ -803,7 +801,10 @@ boolean EnergyCommand()
   unsigned long nvalue = 0;
 
   int command_code = GetCommandCode(command, sizeof(command), XdrvMailbox.topic, kEnergyCommands);
-  if (CMND_POWERDELTA == command_code) {
+  if (-1 == command_code) {
+    serviced = false;  // Unknown command
+  }
+  else if (CMND_POWERDELTA == command_code) {
     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 101)) {
       Settings.energy_power_delta = (1 == XdrvMailbox.payload) ? DEFAULT_POWER_DELTA : XdrvMailbox.payload;
     }
@@ -1005,16 +1006,16 @@ boolean EnergyCommand()
     unit = UNIT_HOUR;
   }
 #endif  // FEATURE_POWER_LIMIT
-  else {
-    serviced = false;
-  }
-  if (!status_flag) {
+  else serviced = false;  // Unknown command
+
+  if (serviced && !status_flag) {
     if (Settings.flag.value_units) {
       snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_LVALUE_SPACE_UNIT, command, nvalue, GetTextIndexed(sunit, sizeof(sunit), unit, kUnitNames));
     } else {
       snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_LVALUE, command, nvalue);
     }
   }
+
   return serviced;
 }
 
@@ -1030,7 +1031,7 @@ void EnergyDrvInit()
     serial_config = SERIAL_8E1;
     energy_flg = ENERGY_CSE7766;
 #ifdef USE_PZEM004T
-  } else if ((pin[GPIO_PZEM_RX] < 99) && (pin[GPIO_PZEM_TX])) {  // Any device with a Pzem004T
+  } else if ((pin[GPIO_PZEM_RX] < 99) && (pin[GPIO_PZEM_TX] < 99)) {  // Any device with a Pzem004T
     energy_flg = ENERGY_PZEM004T;
 #endif  // USE_PZEM004T
   }
@@ -1041,8 +1042,13 @@ void EnergySnsInit()
   if (ENERGY_HLW8012 == energy_flg) HlwInit();
 
 #ifdef USE_PZEM004T
-  if ((ENERGY_PZEM004T == energy_flg) && !PzemInit()) {  // PzemInit needs to be done here as earlier (serial) interrupts may lead to Exceptions
-    energy_flg = ENERGY_NONE;
+  if (ENERGY_PZEM004T == energy_flg) {  // Software serial init needs to be done here as earlier (serial) interrupts may lead to Exceptions
+    PzemSerial = new TasmotaSerial(pin[GPIO_PZEM_RX], pin[GPIO_PZEM_TX], 1);
+    if (PzemSerial->begin(9600)) {
+      if (PzemSerial->hardwareSerial()) { ClaimSerial(); }
+    } else {
+      energy_flg = ENERGY_NONE;
+    }
   }
 #endif  // USE_PZEM004T
 
@@ -1107,6 +1113,17 @@ void EnergyShow(boolean json)
       DomoticzSensor(DZ_CURRENT, energy_current_chr);  // Current
     }
 #endif  // USE_DOMOTICZ
+#ifdef USE_KNX
+    if (show_energy_period) {
+      KnxSensor(KNX_ENERGY_VOLTAGE, energy_voltage);
+      KnxSensor(KNX_ENERGY_CURRENT, energy_current);
+      KnxSensor(KNX_ENERGY_POWER, energy_power);
+      KnxSensor(KNX_ENERGY_POWERFACTOR, energy_power_factor);
+      KnxSensor(KNX_ENERGY_DAILY, energy_daily);
+      KnxSensor(KNX_ENERGY_TOTAL, energy_total);
+      KnxSensor(KNX_ENERGY_START, energy_start);
+    }
+#endif  // USE_KNX
 #ifdef USE_WEBSERVER
   } else {
     snprintf_P(mqtt_data, sizeof(mqtt_data), HTTP_ENERGY_SNS, mqtt_data, energy_voltage_chr, energy_current_chr, energy_power_chr, energy_power_factor_chr, energy_daily_chr, energy_yesterday_chr, energy_total_chr);

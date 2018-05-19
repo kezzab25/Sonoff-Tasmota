@@ -25,9 +25,6 @@
  * Based on source by AlexT (https://github.com/tzapu)
 \*********************************************************************************************/
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
 const char HTTP_HEAD[] PROGMEM =
   "<!DOCTYPE html><html lang=\"" D_HTML_LANGUAGE "\" class=\"\">"
   "<head>"
@@ -330,6 +327,8 @@ uint8_t upload_file_type;
 uint8_t upload_progress_dot_count;
 uint8_t config_block_count = 0;
 uint8_t config_xor_on = 0;
+uint8_t config_xor_on_set = CONFIG_FILE_XOR;
+uint8_t *settings_new = NULL;
 
 // Helper function to avoid code duplication (saves 4k Flash)
 static void WebGetArg(const char* arg, char* out, size_t max)
@@ -390,9 +389,6 @@ void StartWebserver(int type, IPAddress ipweb)
       }
 #endif  // USE_EMULATION
       WebServer->onNotFound(HandleNotFound);
-#ifdef USE_KNX
-      KNXStart();
-#endif // USE_KNX
     }
     reset_web_log_flag = 0;
     WebServer->begin(); // Web server start
@@ -661,6 +657,50 @@ boolean GetUsedInModule(byte val, uint8_t *arr)
 #endif
 #ifndef USE_IR_REMOTE
   if (GPIO_IRSEND == val) { return true; }
+#ifndef USE_IR_RECEIVE
+  if (GPIO_IRRECV == val) { return true; }
+#endif
+#endif
+#ifndef USE_MHZ19
+  if (GPIO_MHZ_TXD == val) { return true; }
+  if (GPIO_MHZ_RXD == val) { return true; }
+#endif
+#ifndef USE_PZEM004T
+  if (GPIO_PZEM_TX == val) { return true; }
+  if (GPIO_PZEM_RX == val) { return true; }
+#endif
+#ifndef USE_SENSEAIR
+  if (GPIO_SAIR_TX == val) { return true; }
+  if (GPIO_SAIR_RX == val) { return true; }
+#endif
+#ifndef USE_SPI
+  if (GPIO_SPI_CS == val) { return true; }
+  if (GPIO_SPI_DC == val) { return true; }
+#endif
+#ifndef USE_DISPLAY
+  if (GPIO_BACKLIGHT == val) { return true; }
+#endif
+#ifndef USE_PMS5003
+  if (GPIO_PMS5003 == val) { return true; }
+#endif
+#ifndef USE_NOVA_SDS
+  if (GPIO_SDS0X1 == val) { return true; }
+#endif
+#ifndef USE_SERIAL_BRIDGE
+  if (GPIO_SBR_TX == val) { return true; }
+  if (GPIO_SBR_RX == val) { return true; }
+#endif
+#ifndef USE_SR04
+  if (GPIO_SR04_TRIG == val) { return true; }
+  if (GPIO_SR04_ECHO == val) { return true; }
+#endif
+#ifndef USE_SDM120
+  if (GPIO_SDM120_TX == val) { return true; }
+  if (GPIO_SDM120_RX == val) { return true; }
+#endif
+#ifndef USE_SDM630
+  if (GPIO_SDM630_TX == val) { return true; }
+  if (GPIO_SDM630_RX == val) { return true; }
 #endif
   if ((val >= GPIO_REL1) && (val < GPIO_REL1 + MAX_RELAYS)) {
     offset = (GPIO_REL1_INV - GPIO_REL1);
@@ -738,7 +778,7 @@ void HandleModuleConfiguration()
   for (byte i = 0; i < MAX_GPIO_PIN; i++) {
     if (GPIO_USER == cmodule.gp.io[i]) {
       snprintf_P(stemp, 3, PINS_WEMOS +i*2);
-      snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("<tr><td style='width:190px'>%s <b>" D_GPIO "%d</b> %s</td><td style='width:126px'><select id='g%d' name='g%d'></select></td></tr>"),
+      snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("<tr><td style='width:190px'>%s <b>" D_GPIO "%d</b> %s</td><td style='width:146px'><select id='g%d' name='g%d'></select></td></tr>"),
         (WEMOS==Settings.module)?stemp:"", i, (0==i)? D_SENSOR_BUTTON "1":(1==i)? D_SERIAL_OUT :(3==i)? D_SERIAL_IN :(12==i)? D_SENSOR_RELAY "1":(13==i)? D_SENSOR_LED "1i":(14==i)? D_SENSOR :"", i, i);
       page += mqtt_data;
     }
@@ -977,10 +1017,10 @@ void HandleBackupConfiguration()
   WebServer->send(200, FPSTR(HDR_CTYPE_STREAM), "");
   memcpy(buffer, &Settings, sizeof(buffer));
   buffer[0] = CONFIG_FILE_SIGN;
-  buffer[1] = (!CONFIG_FILE_XOR)?0:1;
+  buffer[1] = (!config_xor_on_set) ? 0 : 1;
   if (buffer[1]) {
     for (uint16_t i = 2; i < sizeof(buffer); i++) {
-      buffer[i] ^= (CONFIG_FILE_XOR +i);
+      buffer[i] ^= (config_xor_on_set +i);
     }
   }
   myClient.write((const char*)buffer, sizeof(buffer));
@@ -1236,6 +1276,14 @@ void HandleUpgradeFirmwareStart()
   ExecuteCommand(svalue);
 }
 
+void SettingsNewFree()
+{
+  if (settings_new != NULL) {
+    free(settings_new);
+    settings_new = NULL;
+  }
+}
+
 void HandleUploadDone()
 {
   if (HttpUser()) { return; }
@@ -1275,6 +1323,7 @@ void HandleUploadDone()
     page += FPSTR(HTTP_MSG_RSTRT);
     restart_flag = 2;
   }
+  SettingsNewFree();
   page += F("</div><br/>");
   page += FPSTR(HTTP_BTN_MAIN);
   ShowPage(page);
@@ -1302,7 +1351,13 @@ void HandleUploadLoop()
     SettingsSave(1);  // Free flash for upload
     snprintf_P(log_data, sizeof(log_data), PSTR(D_LOG_UPLOAD D_FILE " %s ..."), upload.filename.c_str());
     AddLog(LOG_LEVEL_INFO);
-    if (!upload_file_type) {
+    if (upload_file_type) {
+      SettingsNewFree();
+      if (!(settings_new = (uint8_t *)malloc(sizeof(Settings)))) {
+        upload_error = 2;
+        return;
+      }
+    } else {
       MqttRetryCounter(60);
 #ifdef USE_EMULATION
       UdpDisconnect();
@@ -1343,22 +1398,10 @@ void HandleUploadLoop()
     if (upload_file_type) { // config
       if (!upload_error) {
         if (upload.currentSize > (sizeof(Settings) - (config_block_count * HTTP_UPLOAD_BUFLEN))) {
-          if (config_block_count) { SettingsDefault(); }
           upload_error = 9;
           return;
         }
-        if (config_xor_on) {
-          for (uint16_t i = 2; i < upload.currentSize; i++) {
-            upload.buf[i] ^= (CONFIG_FILE_XOR +i);
-          }
-        }
-        if (0 == config_block_count) {
-          SettingsDefaultSet2();
-          memcpy((char*)&Settings +16, upload.buf +16, upload.currentSize -16);
-          memcpy((char*)&Settings +8, upload.buf +8, 4);  // Restore version and auto upgrade
-        } else {
-          memcpy((char*)&Settings +(config_block_count * HTTP_UPLOAD_BUFLEN), upload.buf, upload.currentSize);
-        }
+        memcpy(settings_new + (config_block_count * HTTP_UPLOAD_BUFLEN), upload.buf, upload.currentSize);
         config_block_count++;
       }
     } else {  // firmware
@@ -1376,7 +1419,17 @@ void HandleUploadLoop()
     if (_serialoutput && (upload_progress_dot_count % 80)) {
       Serial.println();
     }
-    if (!upload_file_type) {
+    if (upload_file_type) {
+      if (config_xor_on) {
+        for (uint16_t i = 2; i < sizeof(Settings); i++) {
+          settings_new[i] ^= (config_xor_on_set +i);
+        }
+      }
+      SettingsDefaultSet2();
+      memcpy((char*)&Settings +16, settings_new +16, sizeof(Settings) -16);
+      memcpy((char*)&Settings +8, settings_new +8, 4);  // Restore version and auto upgrade
+      SettingsNewFree();
+    } else {
       if (!Update.end(true)) { // true to set the size to the current progress
         if (_serialoutput) { Update.printError(Serial); }
         upload_error = 6;
@@ -1407,7 +1460,7 @@ void HandlePreflightRequest()
 void HandleHttpCommand()
 {
   if (HttpUser()) { return; }
-  char svalue[INPUT_BUFFER_SIZE];  // big to serve Backlog
+  char svalue[INPUT_BUFFER_SIZE];  // Large to serve Backlog
 
   AddLog_P(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_COMMAND));
 
@@ -1477,7 +1530,7 @@ void HandleConsole()
 void HandleAjaxConsoleRefresh()
 {
   if (HttpUser()) { return; }
-  char svalue[INPUT_BUFFER_SIZE];  // big to serve Backlog
+  char svalue[INPUT_BUFFER_SIZE];  // Large to serve Backlog
   byte cflg = 1;
   byte counter = 0;                // Initial start, should never be 0 again
 

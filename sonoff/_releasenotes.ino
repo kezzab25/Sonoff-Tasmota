@@ -1,15 +1,42 @@
-/* 5.13.1a
- * Change user_config.h otaurl to http://sonoff.maddox.co.uk/tasmota/sonoff.bin (#2588, #2602)
+/* 5.14.0a
+ * Add feature information to Status 4
+ * Add tools folder with python script decode-status.py for decoding some status fields like SetOption and Features
+ * Add Eastron SDM630 energy meter (#2735)
+ * Add KNX communication enhancement (#2742)
+ * Add KNX energy data (#2750)
+ * Add python script fw-server.py in tools folder to create a simple OTA server (#2759)
+ * Fix display selection of un-available GPIO options in Module Configuration webpage (#2718)
+ * Fix timer re-trigger within one minute after restart (#2744)
+ * Fix IRSend not accepting data value of 0 (#2751)
+ * Fix vars on rules (#2769)
+ * Fix bug in KNX menu (#2770)
+ *
+ * 5.14.0 20180515
+ * Update language files
+ * Update TasmotaSerial to 2.0.0 allowing Hardware Serial Fallback when correct connections are configured
+ * Change command handling
+ * Change user_config(_override).h defines TIME_STD and TIME_DST
+ * Change user_config(_override).h otaurl to http://sonoff.maddox.co.uk/tasmota/sonoff.bin (#2588, #2602)
+ * Fix configuration restore regression from 5.13.1
  * Fix compile error when ADC is enabled and Rules are disabled (#2608)
+ * Fix rule power trigger when no backlog command is used (#2613)
  * Fix several timer data input and output errors (#2597, #2620)
  * Fix KNX config error (#2628)
+ * Fix sensor MHZ-19 vanishing data over time (#2659)
+ * Fix KNX reconnection issue (#2679)
+ * Fix DST and STD time for Southern Hemisphere (#2684, #2714)
  * Add Portuguese in Brazil language file
- * Updated Italian language file (#2618)
+ * Add SetOption26 to enforce use of indexes even when only one relay is present (#1055)
+ * Add support for sensor SI1145 UV Index / IR / Visible light (#2496)
+ * Add rule state test for On/Off in addition to 0/1 (#2613)
+ * Add hardware serial option to MHZ-19 sensor (#2659)
+ * Add Eastron SDM120 energy meter (#2694)
+ * Add user entry DST/STD using commands TimeStd and TimeDst (See wiki for parameter syntax) (#2721)
  *
  * 5.13.1 20180501
  * Fix JSON buffers size too small for execution in some situations (#2580)
- * Add define MODULE for user selecting default model although it preferably should not be changed (#569, #2589)
  * Fix configuration restore (#2591)
+ * Add define MODULE for user selecting default model although it preferably should not be changed (#569, #2589)
  *
  * 5.13.0 20180430
  * Change platformio option sonoff-ds18x20 to sonoff-allsensors enabling ds18x20 and all other sensors in one image

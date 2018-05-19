@@ -33,6 +33,7 @@
 
 //#define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
 
+#define LANGUAGE_LCID 1029
 // HTML (ISO 639-1) Language Code
 #define D_HTML_LANGUAGE "cs"
 
@@ -91,6 +92,7 @@
 #define D_FALSE "Nepravda"
 #define D_FILE "Soubor"
 #define D_FREE_MEMORY "Volná paměť"
+#define D_FREQUENCY "Frequency"
 #define D_GAS "Plyn"
 #define D_GATEWAY "Výchozí brána"
 #define D_GROUP "Skupina"
@@ -101,6 +103,7 @@
 #define D_IMMEDIATE "Okamžité"      // Button immediate
 #define D_INDEX "Index"
 #define D_INFO "Informace"
+#define D_INFRARED "Infrared"
 #define D_INITIALIZED "Inicializovaný"
 #define D_IP_ADDRESS "Adresa IP"
 #define D_LIGHT "Světlo"
@@ -119,6 +122,9 @@
 #define D_PORT "Port"
 #define D_POWER_FACTOR "Účiník"
 #define D_POWERUSAGE "Příkon"
+#define D_POWERUSAGE_ACTIVE "Active Power"
+#define D_POWERUSAGE_APPARENT "Apparent Power"
+#define D_POWERUSAGE_REACTIVE "Reactive Power"
 #define D_PRESSURE "Tlak"
 #define D_PRESSUREATSEALEVEL "Tlak na úrovni hladiny moře"
 #define D_PROGRAM_FLASH_SIZE "Velikost paměti flash"
@@ -154,6 +160,7 @@
 #define D_UPTIME "Uptime"
 #define D_USER "Uživatel"
 #define D_UTC_TIME "UTC"
+#define D_UV_INDEX "UV Index"
 #define D_UV_LEVEL "úroveň UV"
 #define D_VERSION "Verze"
 #define D_VOLTAGE "Napětí"
@@ -394,6 +401,7 @@
 #define D_KNX_COMMAND_OTHER "Jiné"
 #define D_SENT_TO "pošli"
 #define D_KNX_WARNING "Skupinová adresa ( 0 / 0 / 0 ) je rezervována a nemůže být použita."
+#define D_KNX_ENHANCEMENT "Communication Enhancement"
 
 // xdrv_03_energy.ino
 #define D_ENERGY_TODAY "Spotřeba Dnes"
@@ -453,10 +461,15 @@
 #define D_SENSOR_SBR_TX   "SerBr Tx"
 #define D_SENSOR_SR04_TRIG "SR04 Tri"
 #define D_SENSOR_SR04_ECHO "SR04 Ech"
+#define D_SENSOR_SDM120_TX "SDM120 Tx"
+#define D_SENSOR_SDM120_RX "SDM120 Rx"
+#define D_SENSOR_SDM630_TX "SDM630 Tx"
+#define D_SENSOR_SDM630_RX "SDM630 Rx"
 
 // Units
 #define D_UNIT_AMPERE "A"
 #define D_UNIT_CENTIMETER "cm"
+#define D_UNIT_HERTZ "Hz"
 #define D_UNIT_HOUR "hod"
 #define D_UNIT_KILOOHM "kOhm"
 #define D_UNIT_KILOWATTHOUR "kWh"
@@ -473,6 +486,8 @@
 #define D_UNIT_PRESSURE "hPa"
 #define D_UNIT_SECOND "sec"
 #define D_UNIT_SECTORS "sektory"
+#define D_UNIT_VA "VA"
+#define D_UNIT_VAR "VAr"
 #define D_UNIT_VOLT "V"
 #define D_UNIT_WATT "W"
 #define D_UNIT_WATTHOUR "Wh"
