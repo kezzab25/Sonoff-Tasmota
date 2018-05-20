@@ -840,8 +840,7 @@ const mytmplt kModules[MAXMODULE] PROGMEM = {
      GPIO_REL1,        // GPIO12 Red Led and Relay (0 = Off, 1 = On)
      GPIO_LED1_INV,    // GPIO13 Blue Led (0 = On, 1 = Off)
      0, 0, 0, 0
-  }
-};
+  },
 
 /*
   Optionals
