@@ -215,6 +215,7 @@
   #define D_WCFG_3_WPSCONFIG "WPSConfig"
   #define D_WCFG_4_RETRY "Retry"
   #define D_WCFG_5_WAIT "Wait"
+  #define D_WCFG_6_SERIAL "Serial"
 #define D_CMND_FRIENDLYNAME "FriendlyName"
 #define D_CMND_SWITCHMODE "SwitchMode"
 #define D_CMND_TELEPERIOD "TelePeriod"
@@ -376,18 +377,6 @@
 #define D_CMND_LATITUDE "Latitude"
 #define D_CMND_LONGITUDE "Longitude"
 
-// Commands xdrv_98_display.ino
-#define D_CMND_DISPLAY "Display"
-#define D_CMND_DISP_ADDRESS "Address"
-#define D_CMND_DISP_COLS "Cols"
-#define D_CMND_DISP_DIMMER "Dimmer"
-#define D_CMND_DISP_MODE "Mode"
-#define D_CMND_DISP_MODEL "Model"
-#define D_CMND_DISP_REFRESH "Refresh"
-#define D_CMND_DISP_ROWS "Rows"
-#define D_CMND_DISP_SIZE "Size"
-#define D_CMND_DISP_TEXT "Text"
-
 /********************************************************************************************/
 
 #define D_ASTERIX "********"
@@ -458,6 +447,7 @@ const char S_JSON_COMMAND_NVALUE_ACTIVE_NVALUE[] PROGMEM =    "{\"%s\":\"%d (" D
 const char S_JSON_COMMAND_NVALUE[] PROGMEM =                  "{\"%s\":%d}";
 const char S_JSON_COMMAND_LVALUE[] PROGMEM =                  "{\"%s\":%lu}";
 const char S_JSON_COMMAND_SVALUE[] PROGMEM =                  "{\"%s\":\"%s\"}";
+const char S_JSON_COMMAND_HVALUE[] PROGMEM =                  "{\"%s\":\"#%X\"}";
 const char S_JSON_COMMAND_ASTERIX[] PROGMEM =                 "{\"%s\":\"" D_ASTERIX "\"}";
 const char S_JSON_COMMAND_XVALUE[] PROGMEM =                  "{\"%s\":%s}";  // %s must provide quotes on non-number
 
@@ -471,6 +461,7 @@ const char S_JSON_COMMAND_INDEX_NVALUE_ACTIVE_NVALUE[] PROGMEM = "{\"%s%d\":\"%d
 const char S_JSON_SENSOR_INDEX_NVALUE[] PROGMEM =            "{\"" D_CMND_SENSOR "%d\":%d}";
 const char S_JSON_SENSOR_INDEX_SVALUE[] PROGMEM =            "{\"" D_CMND_SENSOR "%d\":\"%s\"}";
 
+const char JSON_SNS_TEMP[] PROGMEM = "%s,\"%s\":{\"" D_JSON_TEMPERATURE "\":%s}";
 const char JSON_SNS_TEMPHUM[] PROGMEM = "%s,\"%s\":{\"" D_JSON_TEMPERATURE "\":%s,\"" D_JSON_HUMIDITY "\":%s}";
 
 const char S_LOG_I2C_FOUND_AT[] PROGMEM = D_LOG_I2C "%s " D_FOUND_AT " 0x%x";
@@ -498,7 +489,8 @@ const char kWifiConfig[MAX_WIFI_OPTION][WCFG_MAX_STRING_LENGTH] PROGMEM = {
   D_WCFG_2_WIFIMANAGER,
   D_WCFG_3_WPSCONFIG,
   D_WCFG_4_RETRY,
-  D_WCFG_5_WAIT };
+  D_WCFG_5_WAIT,
+  D_WCFG_6_SERIAL };
 const char kPrefixes[3][PRFX_MAX_STRING_LENGTH] PROGMEM = {
   D_CMND,
   D_STAT,

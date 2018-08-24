@@ -63,9 +63,6 @@
  *     RuleTimer2 100
 \*********************************************************************************************/
 
-#define MAX_RULE_TIMERS        8
-#define RULES_MAX_VARS         5
-
 #ifndef ULONG_MAX
 #define ULONG_MAX              0xffffffffUL
 #endif
@@ -97,7 +94,7 @@ uint8_t rules_trigger_count[MAX_RULE_SETS] = { 0 };
 uint8_t rules_teleperiod = 0;
 
 char event_data[100];
-char vars[RULES_MAX_VARS][10] = { 0 };
+char vars[MAX_RULE_VARS][10] = { 0 };
 
 /*******************************************************************************************/
 
@@ -168,7 +165,7 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
     rule_task = rule.substring(5, pos);                // "INA219" or "SYSTEM"
   }
 
-  String rule_name = rule.substring(pos +1);           // "CURRENT>0.100" or "BOOT" or "%var1%"
+  String rule_name = rule.substring(pos +1);           // "CURRENT>0.100" or "BOOT" or "%var1%" or "MINUTE|5"
 
   char compare = ' ';
   pos = rule_name.indexOf(">");
@@ -182,6 +179,11 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
       pos = rule_name.indexOf("=");
       if (pos > 0) {
         compare = '=';
+      } else {
+        pos = rule_name.indexOf("|");                  // Modulo, cannot use % easily as it is used for variable detection
+        if (pos > 0) {
+          compare = '%';
+        }
       }
     }
   }
@@ -190,14 +192,14 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
   double rule_value = 0;
   if (pos > 0) {
     String rule_param = rule_name.substring(pos + 1);
-    for (byte i = 0; i < RULES_MAX_VARS; i++) {
+    for (byte i = 0; i < MAX_RULE_VARS; i++) {
       snprintf_P(stemp, sizeof(stemp), PSTR("%%VAR%d%%"), i +1);
       if (rule_param.startsWith(stemp)) {
         rule_param = vars[i];
         break;
       }
     }
-    for (byte i = 0; i < RULES_MAX_MEMS; i++) {
+    for (byte i = 0; i < MAX_RULE_MEMS; i++) {
       snprintf_P(stemp, sizeof(stemp), PSTR("%%MEM%d%%"), i +1);
       if (rule_param.startsWith(stemp)) {
         rule_param = Settings.mems[i];
@@ -236,7 +238,14 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
   // Step 3: Compare rule (value)
   if (str_value) {
     value = CharToDouble((char*)str_value);
+    int int_value = int(value);
+    int int_rule_value = int(rule_value);
     switch (compare) {
+      case '%':
+        if ((int_value > 0) && (int_rule_value > 0)) {
+          if ((int_value % int_rule_value) == 0) { match = true; }
+        }
+        break;
       case '>':
         if (value > rule_value) { match = true; }
         break;
@@ -253,7 +262,7 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
     }
   } else match = true;
 
-  if (Settings.flag.rules_once) {
+  if (bitRead(Settings.rule_once, rule_set)) {
     if (match) {                                       // Only allow match state changes
       if (!bitRead(rules_triggers[rule_set], rules_trigger_count[rule_set])) {
         bitSet(rules_triggers[rule_set], rules_trigger_count[rule_set]);
@@ -314,11 +323,11 @@ bool RuleSetProcess(byte rule_set, String &event_saved)
 //      if (!ucommand.startsWith("BACKLOG")) { commands = "backlog " + commands; }  // Always use Backlog to prevent power race exception
       if (ucommand.indexOf("EVENT ") != -1) { commands = "backlog " + commands; }  // Always use Backlog with event to prevent rule event loop exception
       commands.replace(F("%value%"), rules_event_value);
-      for (byte i = 0; i < RULES_MAX_VARS; i++) {
+      for (byte i = 0; i < MAX_RULE_VARS; i++) {
         snprintf_P(stemp, sizeof(stemp), PSTR("%%var%d%%"), i +1);
         commands.replace(stemp, vars[i]);
       }
-      for (byte i = 0; i < RULES_MAX_MEMS; i++) {
+      for (byte i = 0; i < MAX_RULE_MEMS; i++) {
         snprintf_P(stemp, sizeof(stemp), PSTR("%%mem%d%%"), i +1);
         commands.replace(stemp, Settings.mems[i]);
       }
@@ -432,6 +441,8 @@ void RulesEvery50ms()
             case 2: snprintf_P(json_event, sizeof(json_event), PSTR("{\"Time\":{\"Set\":%d}}"), GetMinutesPastMidnight()); break;
             case 3: strncpy_P(json_event, PSTR("{\"MQTT\":{\"Connected\":1}}"), sizeof(json_event)); break;
             case 4: strncpy_P(json_event, PSTR("{\"MQTT\":{\"Disconnected\":1}}"), sizeof(json_event)); break;
+            case 5: strncpy_P(json_event, PSTR("{\"WIFI\":{\"Connected\":1}}"), sizeof(json_event)); break;
+            case 6: strncpy_P(json_event, PSTR("{\"WIFI\":{\"Disconnected\":1}}"), sizeof(json_event)); break;
           }
           if (json_event[0]) {
             RulesProcessEvent(json_event);
@@ -525,7 +536,18 @@ boolean RulesCommand()
           break;
         }
       } else {
-        strlcpy(Settings.rules[index -1], ('"' == XdrvMailbox.data[0]) ? "" : XdrvMailbox.data, sizeof(Settings.rules[index -1]));
+        int offset = 0;
+        if ('+' == XdrvMailbox.data[0]) {
+          offset = strlen(Settings.rules[index -1]);
+          if (XdrvMailbox.data_len < (sizeof(Settings.rules[index -1]) - offset -1)) {  // Check free space
+            XdrvMailbox.data[0] = ' ';  // Remove + and make sure at least one space is inserted
+          } else {
+            offset = -1;                // Not enough space so skip it
+          }
+        }
+        if (offset != -1) {
+          strlcpy(Settings.rules[index -1] + offset, ('"' == XdrvMailbox.data[0]) ? "" : XdrvMailbox.data, sizeof(Settings.rules[index -1]));
+        }
       }
       rules_triggers[index -1] = 0;  // Reset once flag
     }
@@ -544,57 +566,51 @@ boolean RulesCommand()
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_SVALUE, command, D_JSON_DONE);
   }
-  else if ((CMND_VAR == command_code) && (index > 0) && (index <= RULES_MAX_VARS)) {
+  else if ((CMND_VAR == command_code) && (index > 0) && (index <= MAX_RULE_VARS)) {
     if (XdrvMailbox.data_len > 0) {
       strlcpy(vars[index -1], ('"' == XdrvMailbox.data[0]) ? "" : XdrvMailbox.data, sizeof(vars[index -1]));
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, vars[index -1]);
   }
-  else if ((CMND_MEM == command_code) && (index > 0) && (index <= RULES_MAX_MEMS)) {
+  else if ((CMND_MEM == command_code) && (index > 0) && (index <= MAX_RULE_MEMS)) {
     if (XdrvMailbox.data_len > 0) {
       strlcpy(Settings.mems[index -1], ('"' == XdrvMailbox.data[0]) ? "" : XdrvMailbox.data, sizeof(Settings.mems[index -1]));
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, Settings.mems[index -1]);
   }
-  else if ((CMND_ADD == command_code) && (index > 0) && (index <= RULES_MAX_VARS)) {
-    if ( XdrvMailbox.data_len > 0 ) {
+  else if ((CMND_ADD == command_code) && (index > 0) && (index <= MAX_RULE_VARS)) {
+    if (XdrvMailbox.data_len > 0) {
       double tempvar = CharToDouble(vars[index -1]) + CharToDouble(XdrvMailbox.data);
-      dtostrfd(tempvar,2,vars[index -1]);
+      dtostrfd(tempvar, 2, vars[index -1]);
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, vars[index -1]);
   }
-  else if ((CMND_SUB == command_code) && (index > 0) && (index <= RULES_MAX_VARS)) {
-    if ( XdrvMailbox.data_len > 0 ){
+  else if ((CMND_SUB == command_code) && (index > 0) && (index <= MAX_RULE_VARS)) {
+    if (XdrvMailbox.data_len > 0) {
       double tempvar = CharToDouble(vars[index -1]) - CharToDouble(XdrvMailbox.data);
-      dtostrfd(tempvar,2,vars[index -1]);
+      dtostrfd(tempvar, 2, vars[index -1]);
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, vars[index -1]);
   }
-  else if ((CMND_MULT == command_code) && (index > 0) && (index <= RULES_MAX_VARS)) {
-    if ( XdrvMailbox.data_len > 0 ){
+  else if ((CMND_MULT == command_code) && (index > 0) && (index <= MAX_RULE_VARS)) {
+    if (XdrvMailbox.data_len > 0) {
       double tempvar = CharToDouble(vars[index -1]) * CharToDouble(XdrvMailbox.data);
-      dtostrfd(tempvar,2,vars[index -1]);
+      dtostrfd(tempvar, 2, vars[index -1]);
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, vars[index -1]);
   }
-  else if ((CMND_SCALE == command_code) && (index > 0) && (index <= RULES_MAX_VARS)) {
-    if ( XdrvMailbox.data_len > 0 ) {
+  else if ((CMND_SCALE == command_code) && (index > 0) && (index <= MAX_RULE_VARS)) {
+    if (XdrvMailbox.data_len > 0) {
       if (strstr(XdrvMailbox.data, ",")) {     // Process parameter entry
-        double value = 0;
-        double valueIN = 0;
-        double fromLow = 0;
-        double fromHigh = 0;
-        double toLow = 0;
-        double toHigh = 0;
+        char sub_string[XdrvMailbox.data_len +1];
 
-        valueIN = CharToDouble(subStr(XdrvMailbox.data, ",", 1));
-        fromLow = CharToDouble(subStr(XdrvMailbox.data, ",", 2));
-        fromHigh = CharToDouble(subStr(XdrvMailbox.data, ",", 3));
-        toLow = CharToDouble(subStr(XdrvMailbox.data, ",", 4));
-        toHigh = CharToDouble(subStr(XdrvMailbox.data, ",", 5));
-
-        value = map_double(valueIN, fromLow, fromHigh, toLow, toHigh);
-        dtostrfd(value,2,vars[index -1]);
+        double valueIN = CharToDouble(subStr(sub_string, XdrvMailbox.data, ",", 1));
+        double fromLow = CharToDouble(subStr(sub_string, XdrvMailbox.data, ",", 2));
+        double fromHigh = CharToDouble(subStr(sub_string, XdrvMailbox.data, ",", 3));
+        double toLow = CharToDouble(subStr(sub_string, XdrvMailbox.data, ",", 4));
+        double toHigh = CharToDouble(subStr(sub_string, XdrvMailbox.data, ",", 5));
+        double value = map_double(valueIN, fromLow, fromHigh, toLow, toHigh);
+        dtostrfd(value, 2, vars[index -1]);
       }
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_SVALUE, command, index, vars[index -1]);
@@ -608,25 +624,6 @@ double map_double(double x, double in_min, double in_max, double out_min, double
 {
  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
-// Function to return a substring defined by a delimiter at an index
-char* subStr (char* str, const char *delim, int index) {
-  char *act, *sub, *ptr;
-  static char copy[10];
-  int i;
-
-  // Since strtok consumes the first arg, make a copy
-  strcpy(copy, str);
-
-  for (i = 1, act = copy; i <= index; i++, act = NULL) {
-     sub = strtok_r(act, delim, &ptr);
-     if (sub == NULL) break;
-  }
-  sub = LTrim(sub);
-  sub = RTrim(sub);
-  return sub;
-}
-
 
 /*********************************************************************************************\
  * Interface
