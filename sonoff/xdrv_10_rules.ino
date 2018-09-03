@@ -63,10 +63,6 @@
  *     RuleTimer2 100
 \*********************************************************************************************/
 
-#ifndef ULONG_MAX
-#define ULONG_MAX              0xffffffffUL
-#endif
-
 #define D_CMND_RULE "Rule"
 #define D_CMND_RULETIMER "RuleTimer"
 #define D_CMND_EVENT "Event"
@@ -95,53 +91,6 @@ uint8_t rules_teleperiod = 0;
 
 char event_data[100];
 char vars[MAX_RULE_VARS][10] = { 0 };
-
-/*******************************************************************************************/
-
-long TimeDifference(unsigned long prev, unsigned long next)
-{
-  // Return the time difference as a signed value, taking into account the timers may overflow.
-  // Returned timediff is between -24.9 days and +24.9 days.
-  // Returned value is positive when "next" is after "prev"
-  long signed_diff = 0;
-  // To cast a value to a signed long, the difference may not exceed half the ULONG_MAX
-  const unsigned long half_max_unsigned_long = 2147483647u;  // = 2^31 -1
-  if (next >= prev) {
-    const unsigned long diff = next - prev;
-    if (diff <= half_max_unsigned_long) {                    // Normal situation, just return the difference.
-      signed_diff = static_cast<long>(diff);                 // Difference is a positive value.
-    } else {
-      // prev has overflow, return a negative difference value
-      signed_diff = static_cast<long>((ULONG_MAX - next) + prev + 1u);
-      signed_diff = -1 * signed_diff;
-    }
-  } else {
-    // next < prev
-    const unsigned long diff = prev - next;
-    if (diff <= half_max_unsigned_long) {                    // Normal situation, return a negative difference value
-      signed_diff = static_cast<long>(diff);
-      signed_diff = -1 * signed_diff;
-    } else {
-      // next has overflow, return a positive difference value
-      signed_diff = static_cast<long>((ULONG_MAX - prev) + next + 1u);
-    }
-  }
-  return signed_diff;
-}
-
-long TimePassedSince(unsigned long timestamp)
-{
-  // Compute the number of milliSeconds passed since timestamp given.
-  // Note: value can be negative if the timestamp has not yet been reached.
-  return TimeDifference(timestamp, millis());
-}
-
-bool TimeReached(unsigned long timer)
-{
-  // Check if a certain timeout has been reached.
-  const long passed = TimePassedSince(timer);
-  return (passed >= 0);
-}
 
 /*******************************************************************************************/
 
@@ -206,6 +155,24 @@ bool RulesRuleMatch(byte rule_set, String &event, String &rule)
         break;
       }
     }
+    snprintf_P(stemp, sizeof(stemp), PSTR("%%TIME%%"));
+    if (rule_param.startsWith(stemp)) {
+      rule_param = String(GetMinutesPastMidnight());
+    }
+    snprintf_P(stemp, sizeof(stemp), PSTR("%%UPTIME%%"));
+    if (rule_param.startsWith(stemp)) {
+      rule_param = String(GetMinutesUptime());
+    }
+#if defined(USE_TIMERS) && defined(USE_SUNRISE)
+    snprintf_P(stemp, sizeof(stemp), PSTR("%%SUNRISE%%"));
+    if (rule_param.startsWith(stemp)) {
+      rule_param = String(GetSunMinutes(0));
+    }
+    snprintf_P(stemp, sizeof(stemp), PSTR("%%SUNSET%%"));
+    if (rule_param.startsWith(stemp)) {
+      rule_param = String(GetSunMinutes(1));
+    }
+#endif  // USE_TIMERS and USE_SUNRISE
     rule_param.toUpperCase();
     snprintf(rule_svalue, sizeof(rule_svalue), rule_param.c_str());
 
@@ -452,20 +419,21 @@ void RulesEvery50ms()
         mask <<= 1;
       }
     }
-    else {
-      rules_quota++;
-      if (rules_quota &1) {              // Every 100 ms
-        mqtt_data[0] = '\0';
-        uint16_t tele_period_save = tele_period;
-        tele_period = 2;                 // Do not allow HA updates during next function call
-        XsnsNextCall(FUNC_JSON_APPEND);  // ,"INA219":{"Voltage":4.494,"Current":0.020,"Power":0.089}
-        tele_period = tele_period_save;
-        if (strlen(mqtt_data)) {
-          mqtt_data[0] = '{';            // {"INA219":{"Voltage":4.494,"Current":0.020,"Power":0.089}
-          snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("%s}"), mqtt_data);
-          RulesProcess();
-        }
-      }
+  }
+}
+
+void RulesEvery100ms()
+{
+  if (Settings.rule_enabled) {       // Any rule enabled
+    mqtt_data[0] = '\0';
+    uint16_t tele_period_save = tele_period;
+    tele_period = 2;                 // Do not allow HA updates during next function call
+    XsnsNextCall(FUNC_JSON_APPEND);  // ,"INA219":{"Voltage":4.494,"Current":0.020,"Power":0.089}
+    tele_period = tele_period_save;
+    if (strlen(mqtt_data)) {
+      mqtt_data[0] = '{';            // {"INA219":{"Voltage":4.494,"Current":0.020,"Power":0.089}
+      snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("%s}"), mqtt_data);
+      RulesProcess();
     }
   }
 }
@@ -518,7 +486,7 @@ boolean RulesCommand()
   }
   else if ((CMND_RULE == command_code) && (index > 0) && (index <= MAX_RULE_SETS)) {
     if ((XdrvMailbox.data_len > 0) && (XdrvMailbox.data_len < sizeof(Settings.rules[index -1]))) {
-      if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 6)) {
+      if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 10)) {
         switch (XdrvMailbox.payload) {
         case 0: // Off
         case 1: // On
@@ -533,6 +501,13 @@ boolean RulesCommand()
           break;
         case 6: // Toggle
           bitWrite(Settings.rule_once, index -1, bitRead(Settings.rule_once, index -1) ^1);
+          break;
+        case 8: // Off
+        case 9: // On
+          bitWrite(Settings.rule_stop, index -1, XdrvMailbox.payload &1);
+          break;
+        case 10: // Toggle
+          bitWrite(Settings.rule_stop, index -1, bitRead(Settings.rule_stop, index -1) ^1);
           break;
         }
       } else {
@@ -551,14 +526,19 @@ boolean RulesCommand()
       }
       rules_triggers[index -1] = 0;  // Reset once flag
     }
-    snprintf_P (mqtt_data, sizeof(mqtt_data), PSTR("{\"%s%d\":\"%s\",\"Once\":\"%s\",\"Free\":%d,\"Rules\":\"%s\"}"),
-      command, index, GetStateText(bitRead(Settings.rule_enabled, index -1)), GetStateText(bitRead(Settings.rule_once, index -1)), sizeof(Settings.rules[index -1]) - strlen(Settings.rules[index -1]) -1, Settings.rules[index -1]);
+    snprintf_P (mqtt_data, sizeof(mqtt_data), PSTR("{\"%s%d\":\"%s\",\"Once\":\"%s\",\"StopOnError\":\"%s\",\"Free\":%d,\"Rules\":\"%s\"}"),
+      command, index, GetStateText(bitRead(Settings.rule_enabled, index -1)), GetStateText(bitRead(Settings.rule_once, index -1)),
+      GetStateText(bitRead(Settings.rule_stop, index -1)), sizeof(Settings.rules[index -1]) - strlen(Settings.rules[index -1]) -1, Settings.rules[index -1]);
   }
   else if ((CMND_RULETIMER == command_code) && (index > 0) && (index <= MAX_RULE_TIMERS)) {
     if (XdrvMailbox.data_len > 0) {
       rules_timer[index -1] = (XdrvMailbox.payload > 0) ? millis() + (1000 * XdrvMailbox.payload) : 0;
     }
-    snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_INDEX_LVALUE, command, index, (rules_timer[index -1]) ? (rules_timer[index -1] - millis()) / 1000 : 0);
+    mqtt_data[0] = '\0';
+    for (byte i = 0; i < MAX_RULE_TIMERS; i++) {
+      snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("%s%c\"T%d\":%d"), mqtt_data, (i) ? ',' : '{', i +1, (rules_timer[i]) ? (rules_timer[i] - millis()) / 1000 : 0);
+    }
+    snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("%s}"), mqtt_data);
   }
   else if (CMND_EVENT == command_code) {
     if (XdrvMailbox.data_len > 0) {
@@ -641,6 +621,9 @@ boolean Xdrv10(byte function)
       break;
     case FUNC_EVERY_50_MSECOND:
       RulesEvery50ms();
+      break;
+    case FUNC_EVERY_100_MSECOND:
+      RulesEvery100ms();
       break;
     case FUNC_EVERY_SECOND:
       RulesEverySecond();

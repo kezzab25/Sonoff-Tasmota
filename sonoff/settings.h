@@ -22,7 +22,7 @@
 
 #define PARAM8_SIZE  18                    // Number of param bytes (SetOption)
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so usefull...
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint32_t data;                           // Allow bit manipulation using SetOption
   struct {                                 // SetOption0 .. SetOption31
     uint32_t save_state : 1;               // bit 0
@@ -60,7 +60,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   };
 } SysBitfield;
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so usefull...
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint32_t data;                           // Allow bit manipulation using SetOption
   struct {                                 // SetOption50 .. SetOption81
     uint32_t timers_enable : 1;            // bit 0 (v6.1.1b)
@@ -94,7 +94,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t spare28 : 1;
     uint32_t spare29 : 1;
     uint32_t spare30 : 1;
-    uint32_t spare31 : 1;
+    uint32_t user_esp8285_enable : 1;      // bit 31 (v6.1.1.14)
   };
 } SysBitfield3;
 
@@ -159,8 +159,8 @@ typedef union {
     uint16_t saved_state : 1;               // Save output state, if used.
     uint16_t int_report_mode : 2;           // Interrupt reporting mode 0 = immediate telemetry & event, 1 = immediate event only, 2 = immediate telemetry only
     uint16_t int_report_defer : 4;          // Number of interrupts to ignore until reporting (default 0, max 15)
-    uint16_t int_count_sec : 1;             // 0 = Not, 1 = Report number of interrupts since last FUNC_EVERY_SECOND callback if more than 0 occured (overrides int_report_mode if enabled)
-    uint16_t int_count_min : 1;             // 0 = Not, 1 = Report number of interrupts since last FUNC_EVERY_SECOND*60 callback if more than 0 occured (overrides int_report_mode if enabled)
+    uint16_t int_count_en : 1;              // Enable interrupt counter for this pin
+    uint16_t spare12 : 1;
     uint16_t spare13 : 1;
     uint16_t spare14 : 1;
     uint16_t spare15 : 1;
@@ -194,9 +194,7 @@ struct SYSCFG {
   char          sta_pwd[2][65];            // 0E3
   char          hostname[33];              // 165
   char          syslog_host[33];           // 186
-
-  byte          free1A7[1];                // 1A7
-
+  uint8_t       rule_stop;                 // 1A7
   uint16_t      syslog_port;               // 1A8
   byte          syslog_level;              // 1AA
   uint8_t       webserver;                 // 1AB
@@ -297,9 +295,7 @@ struct SYSCFG {
   char          ntp_server[3][33];         // 4CE
   byte          ina219_mode;               // 531
   uint16_t      pulse_timer[MAX_PULSETIMERS]; // 532
-
-  byte          free542[2];                // 542
-
+  uint16_t      button_debounce;           // 542
   uint32_t      ip_address[4];             // 544
   unsigned long energy_kWhtotal;           // 554
   char          mqtt_fulltopic[100];       // 558
@@ -309,8 +305,9 @@ struct SYSCFG {
   uint16_t      pulse_counter_debounce;    // 5D2
   uint8_t       rf_code[17][9];            // 5D4
 
-  byte          free_66d[3];               // 66D
+  byte          free_66d[1];               // 66D
 
+  uint16_t      switch_debounce;           // 66E
   Timer         timer[MAX_TIMERS];         // 670
   int           latitude;                  // 6B0
   int           longitude;                 // 6B4
@@ -322,7 +319,11 @@ struct SYSCFG {
   Mcp230xxCfg   mcp230xx_config[16];       // 6F6
   uint8_t       mcp230xx_int_prio;         // 716
 
-  byte          free_717[183];             // 717
+  byte          free_717[1];               // 717
+
+  uint16_t      mcp230xx_int_timer;        // 718
+
+  byte          free_71A[180];             // 71A
 
   char          mems[MAX_RULE_MEMS][10];  // 7CE
                                            // 800 Full - no more free locations
@@ -340,7 +341,10 @@ struct RTCMEM {
   unsigned long energy_kWhtotal;              // 008
   unsigned long pulse_counter[MAX_COUNTERS];  // 00C
   power_t       power;                     // 01C
-                                           // 020 next free location
+  uint16_t      extended_valid;            // 020 Extended valid flag (v6.1.1.14)
+  uint8_t       fast_reboot_count;         // 022
+  uint8_t       free_023[57];              // 023
+                                           // 05C next free location (64 (=core) + 100 (=tasmota offset) + 92 (=0x5C RTCMEM struct) = 256 bytes (max = 512))
 } RtcSettings;
 
 struct TIME_T {
@@ -370,7 +374,7 @@ struct XDRVMAILBOX {
 } XdrvMailbox;
 
 #define MAX_RULES_FLAG  7                  // Number of bits used in RulesBitfield (tricky I know...)
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so usefull...
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint16_t data;                           // Allow bit manipulation
   struct {
     uint16_t system_boot : 1;
