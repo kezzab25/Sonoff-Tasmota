@@ -64,8 +64,8 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
   uint32_t data;                           // Allow bit manipulation using SetOption
   struct {                                 // SetOption50 .. SetOption81
     uint32_t timers_enable : 1;            // bit 0 (v6.1.1b)
-    uint32_t spare01 : 1;
-    uint32_t spare02 : 1;
+    uint32_t user_esp8285_enable : 1;      // bit 1 (v6.1.1.14)
+    uint32_t time_append_timezone : 1;     // bit 2 (v6.2.1.2)
     uint32_t spare03 : 1;
     uint32_t spare04 : 1;
     uint32_t spare05 : 1;
@@ -94,7 +94,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t spare28 : 1;
     uint32_t spare29 : 1;
     uint32_t spare30 : 1;
-    uint32_t user_esp8285_enable : 1;      // bit 31 (v6.1.1.14)
+    uint32_t spare31 : 1;
   };
 } SysBitfield3;
 
@@ -112,8 +112,7 @@ typedef union {
     uint32_t spare08 : 1;
     uint32_t spare09 : 1;
     uint32_t spare10 : 1;
-    uint32_t spare11 : 1;
-    uint32_t spare12 : 1;
+    uint32_t frequency_resolution : 2;
     uint32_t axis_resolution : 2;
     uint32_t current_resolution : 2;
     uint32_t voltage_resolution : 2;
@@ -333,6 +332,12 @@ struct SYSCFG {
                                            // E00 - FFF free locations
 } Settings;
 
+struct RTCRBT {
+  uint16_t      valid;                     // 000
+  uint8_t       fast_reboot_count;         // 002
+  uint8_t       free_003[1];               // 003
+} RtcReboot;
+
 struct RTCMEM {
   uint16_t      valid;                     // 000
   byte          oswatch_blocked_loop;      // 002
@@ -341,9 +346,7 @@ struct RTCMEM {
   unsigned long energy_kWhtotal;              // 008
   unsigned long pulse_counter[MAX_COUNTERS];  // 00C
   power_t       power;                     // 01C
-  uint16_t      extended_valid;            // 020 Extended valid flag (v6.1.1.14)
-  uint8_t       fast_reboot_count;         // 022
-  uint8_t       free_023[57];              // 023
+  uint8_t       free_020[60];              // 020
                                            // 05C next free location (64 (=core) + 100 (=tasmota offset) + 92 (=0x5C RTCMEM struct) = 256 bytes (max = 512))
 } RtcSettings;
 
