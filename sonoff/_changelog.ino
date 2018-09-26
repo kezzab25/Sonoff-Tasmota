@@ -1,6 +1,13 @@
-/* 6.2.1.7 20180925
+/* 6.2.1.8 20180926
+ * Change status JSON message providing more switch and retain information
+ * Change pinmode for no-pullup defined switches to pullup when configured as switchmode PUSHBUTTON (=3 and up) (#3896)
+ * Add delay after restart before processing rule sensor data (#3811)
+ *
+ * 6.2.1.7 20180925
  * Remove restart after ntpserver change and force NTP re-sync (#3890)
  * Release full Shelly2 support
+ * Released tools/decode-config.py by Norbert Richter to decode configuration data. See file for information
+ * Add define USE_DISPLAYS for selecting image sonoff-display
  *
  * 6.2.1.6 20180922
  * Removed commands PowerCal, VoltageCal and CurrentCal as more functionality is provided by commands PowerSet, VoltageSet and CurrentSet
