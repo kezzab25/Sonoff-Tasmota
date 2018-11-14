@@ -531,7 +531,7 @@ void MqttDataHandler(char* topic, byte* data, unsigned int data_len)
         char *blcommand = strtok(dataBuf, ";");
         while ((blcommand != NULL) && (backlog_index != bl_pointer)) {
           while(true) {
-            blcommand = LTrim(blcommand);
+            blcommand = Trim(blcommand);
             if (!strncasecmp_P(blcommand, PSTR(D_CMND_BACKLOG), strlen(D_CMND_BACKLOG))) {
               blcommand += strlen(D_CMND_BACKLOG);                                  // Skip unnecessary command Backlog
             } else {
@@ -1224,9 +1224,9 @@ void MqttDataHandler(char* topic, byte* data, unsigned int data_len)
               if (5 == tpos) { Settings.tflag[ts].hour = (value < 0) ? 0 : (value > 23) ? 23 : value; }
               if (6 == tpos) { Settings.toffset[ts] = (value < -900) ? -900 : (value > 900) ? 900 : value; }
             }
-            p = LTrim(p);                        // Skip spaces
+            p = Trim(p);                        // Skip spaces
             if (tpos && (*p == ',')) { p++; }    // Skip separator
-            p = LTrim(p);                        // Skip spaces
+            p = Trim(p);                        // Skip spaces
             q = p;                               // Reset any value entered flag
             value = strtol(p, &p, 10);
             tpos++;                              // Next parameter
@@ -2383,8 +2383,9 @@ void SerialInput()
 void GpioSwitchPinMode(uint8_t index)
 {
   if (pin[GPIO_SWT1 +index] < 99) {
-//    pinMode(pin[GPIO_SWT1 +index], (16 == pin[GPIO_SWT1 +index]) ? INPUT_PULLDOWN_16 : bitRead(switch_no_pullup, index) ? INPUT : INPUT_PULLUP);
-
+    pinMode(pin[GPIO_SWT1 +index], (16 == pin[GPIO_SWT1 +index]) ? INPUT_PULLDOWN_16 : bitRead(switch_no_pullup, index) ? INPUT : INPUT_PULLUP);
+/*
+    // Re-enable pull-up on Shelly2 as of 20181110 (#4255)
     uint8_t no_pullup = bitRead(switch_no_pullup, index);       // 0 = INPUT_PULLUP, 1 = INPUT
     if (no_pullup) {
       if (SHELLY2 == Settings.module) {
@@ -2393,6 +2394,7 @@ void GpioSwitchPinMode(uint8_t index)
       }
     }
     pinMode(pin[GPIO_SWT1 +index], (16 == pin[GPIO_SWT1 +index]) ? INPUT_PULLDOWN_16 : (no_pullup) ? INPUT : INPUT_PULLUP);
+*/
   }
 }
 
