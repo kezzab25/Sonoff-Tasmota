@@ -53,6 +53,8 @@
 
 \*********************************************************************************************/
 
+#define XSNS_04             4
+
 uint16_t sc_value[5] = { 0 };
 
 void SonoffScSend(const char *data)
@@ -130,6 +132,14 @@ void SonoffScShow(boolean json)
         DomoticzSensor(DZ_AIRQUALITY, 500 + ((100 - sc_value[4]) * 20));
       }
 #endif  // USE_DOMOTICZ
+
+#ifdef USE_KNX
+      if (0 == tele_period) {
+        KnxSensor(KNX_TEMPERATURE, t);
+        KnxSensor(KNX_HUMIDITY, h);
+      }
+#endif  // USE_KNX
+
 #ifdef USE_WEBSERVER
     } else {
       snprintf_P(mqtt_data, sizeof(mqtt_data), HTTP_SNS_TEMP, mqtt_data, "", temperature, TempUnit());
@@ -143,8 +153,6 @@ void SonoffScShow(boolean json)
 /*********************************************************************************************\
  * Interface
 \*********************************************************************************************/
-
-#define XSNS_04
 
 boolean Xsns04(byte function)
 {

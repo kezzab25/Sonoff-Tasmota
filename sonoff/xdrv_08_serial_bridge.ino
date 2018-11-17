@@ -21,6 +21,9 @@
 /*********************************************************************************************\
  * Serial Bridge using Software Serial library (TasmotaSerial)
 \*********************************************************************************************/
+
+#define XDRV_08                    8
+
 #define SERIAL_BRIDGE_BUFFER_SIZE  130
 
 #include <TasmotaSerial.h>
@@ -61,6 +64,7 @@ void SerialBridgeInput()
     serial_bridge_buffer[serial_bridge_in_byte_counter] = 0;  // serial data completed
     snprintf_P(mqtt_data, sizeof(mqtt_data), PSTR("{\"" D_JSON_SSERIALRECEIVED "\":\"%s\"}"), serial_bridge_buffer);
     MqttPublishPrefixTopic_P(RESULT_OR_TELE, PSTR(D_JSON_SSERIALRECEIVED));
+//    XdrvRulesProcess();
     serial_bridge_in_byte_counter = 0;
   }
 }
@@ -89,7 +93,10 @@ boolean SerialBridgeCommand()
   boolean serviced = true;
 
   int command_code = GetCommandCode(command, sizeof(command), XdrvMailbox.topic, kSerialBridgeCommands);
-  if ((CMND_SSERIALSEND == command_code) && (XdrvMailbox.index > 0) && (XdrvMailbox.index <= 3)) {
+  if (-1 == command_code) {
+    serviced = false;  // Unknown command
+  }
+  else if ((CMND_SSERIALSEND == command_code) && (XdrvMailbox.index > 0) && (XdrvMailbox.index <= 3)) {
     if (XdrvMailbox.data_len > 0) {
       if (1 == XdrvMailbox.index) {
         SerialBridgeSerial->write(XdrvMailbox.data, XdrvMailbox.data_len);
@@ -114,9 +121,8 @@ boolean SerialBridgeCommand()
     }
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_LVALUE, command, Settings.sbaudrate * 1200);
   }
-  else {
-    serviced = false;  // Unknown command
-  }
+  else serviced = false;  // Unknown command
+  
   return serviced;
 }
 
@@ -124,15 +130,13 @@ boolean SerialBridgeCommand()
  * Interface
 \*********************************************************************************************/
 
-#define XDRV_08
-
 boolean Xdrv08(byte function)
 {
   boolean result = false;
 
   if (serial_bridge_active) {
     switch (function) {
-      case FUNC_INIT:
+      case FUNC_PRE_INIT:
         SerialBridgeInit();
         break;
       case FUNC_LOOP:
