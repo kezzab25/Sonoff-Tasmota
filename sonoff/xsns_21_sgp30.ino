@@ -27,8 +27,6 @@
  * I2C Address: 0x58
 \*********************************************************************************************/
 
-#define XSNS_21             21
-
 #include "Adafruit_SGP30.h"
 Adafruit_SGP30 sgp;
 
@@ -78,8 +76,8 @@ void Sgp30Show(boolean json)
 #ifdef USE_DOMOTICZ
       if (0 == tele_period) DomoticzSensor(DZ_AIRQUALITY, sgp.eCO2);
 #endif  // USE_DOMOTICZ
-#ifdef USE_WEBSERVER
     } else {
+#ifdef USE_WEBSERVER
       snprintf_P(mqtt_data, sizeof(mqtt_data), HTTP_SNS_SGP30, mqtt_data, sgp.eCO2, sgp.TVOC);
 #endif
     }
@@ -89,6 +87,8 @@ void Sgp30Show(boolean json)
 /*********************************************************************************************\
  * Interface
 \*********************************************************************************************/
+
+#define XSNS_21
 
 boolean Xsns21(byte function)
 {
