@@ -1,7 +1,7 @@
 /*
   xsns_16_tsl2561.ino - TSL2561 light sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends and Joachim Banzhaf
+  Copyright (C) 2019  Theo Arends and Joachim Banzhaf
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ uint8_t tsl2561_valid = 0;
 uint32_t tsl2561_milliLux = 0;
 char tsl2561_types[] = "TSL2561";
 
-bool Tsl2561Read()
+bool Tsl2561Read(void)
 {
   if (tsl2561_valid) { tsl2561_valid--; }
 
@@ -63,7 +63,7 @@ bool Tsl2561Read()
   return true;
 }
 
-void Tsl2561Detect()
+void Tsl2561Detect(void)
 {
   if (tsl2561_type) { return; }
 
@@ -77,7 +77,7 @@ void Tsl2561Detect()
   }
 }
 
-void Tsl2561EverySecond()
+void Tsl2561EverySecond(void)
 {
   if (90 == (uptime %100)) {
     // 1mS

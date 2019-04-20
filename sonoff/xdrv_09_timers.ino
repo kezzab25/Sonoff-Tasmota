@@ -1,7 +1,7 @@
 /*
   xdrv_09_timers.ino - timer support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends
+  Copyright (C) 2019  Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ const double pi2 = TWO_PI;
 const double pi = PI;
 const double RAD = DEG_TO_RAD;
 
-double JulianischesDatum()
+double JulianischesDatum(void)
 {
   // Gregorianischer Kalender
   int Gregor;
@@ -135,7 +135,6 @@ void DuskTillDawn(uint8_t *hour_up,uint8_t *minute_up, uint8_t *hour_down, uint8
 //  double Zeitzone = 2.0;   //Sommerzeit
   double Zeitzone = ((double)time_timezone) / 60;
   double Zeitgleichung = BerechneZeitgleichung(&DK, T);
-  double Minuten = Zeitgleichung * 60.0;
   double Zeitdifferenz = 12.0*acos((sin(h) - sin(B)*sin(DK)) / (cos(B)*cos(DK)))/pi;
   double AufgangOrtszeit = 12.0 - Zeitdifferenz - Zeitgleichung;
   double UntergangOrtszeit = 12.0 + Zeitdifferenz - Zeitgleichung;
@@ -255,12 +254,12 @@ void TimerSetRandomWindow(byte index)
   }
 }
 
-void TimerSetRandomWindows()
+void TimerSetRandomWindows(void)
 {
   for (byte i = 0; i < MAX_TIMERS; i++) { TimerSetRandomWindow(i); }
 }
 
-void TimerEverySecond()
+void TimerEverySecond(void)
 {
   if (RtcTime.valid) {
     if (!RtcTime.hour && !RtcTime.minute && !RtcTime.second) { TimerSetRandomWindows(); }  // Midnight
@@ -338,7 +337,7 @@ void PrepShowTimer(uint8_t index)
  * Commands
 \*********************************************************************************************/
 
-boolean TimerCommand()
+boolean TimerCommand(void)
 {
   char command[CMDSZ];
   char dataBufUc[XdrvMailbox.data_len];
@@ -488,7 +487,7 @@ boolean TimerCommand()
     if (XdrvMailbox.data_len) {
       Settings.longitude = (int)(CharToDouble(XdrvMailbox.data) *1000000);
     }
-    char lbuff[32];
+    char lbuff[33];
     dtostrfd(((double)Settings.longitude) /1000000, 6, lbuff);
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_SVALUE, command, lbuff);
   }
@@ -496,7 +495,7 @@ boolean TimerCommand()
     if (XdrvMailbox.data_len) {
       Settings.latitude = (int)(CharToDouble(XdrvMailbox.data) *1000000);
     }
-    char lbuff[32];
+    char lbuff[33];
     dtostrfd(((double)Settings.latitude) /1000000, 6, lbuff);
     snprintf_P(mqtt_data, sizeof(mqtt_data), S_JSON_COMMAND_SVALUE, command, lbuff);
   }
@@ -681,10 +680,10 @@ const char HTTP_FORM_TIMER1[] PROGMEM =
   "</div><br/>"
   "<div id='ds' name='ds'></div>";
 
-void HandleTimerConfiguration()
+void HandleTimerConfiguration(void)
 {
-  if (HttpUser()) { return; }
-  if (!WebAuthenticate()) { return WebServer->requestAuthentication(); }
+  if (!HttpCheckPriviledgedAccess()) { return; }
+
   AddLog_P(LOG_LEVEL_DEBUG, S_LOG_HTTP, S_CONFIGURE_TIMER);
 
   if (WebServer->hasArg("save")) {
@@ -717,7 +716,7 @@ void HandleTimerConfiguration()
   ShowPage(page);
 }
 
-void TimerSaveSettings()
+void TimerSaveSettings(void)
 {
   char tmp[MAX_TIMERS *12];  // Need space for MAX_TIMERS x 10 digit numbers separated by a comma
   Timer timer;
@@ -757,9 +756,9 @@ boolean Xdrv09(byte function)
 #ifdef USE_TIMERS_WEB
     case FUNC_WEB_ADD_BUTTON:
 #ifdef USE_RULES
-      strncat_P(mqtt_data, HTTP_BTN_MENU_TIMER, sizeof(mqtt_data));
+      strncat_P(mqtt_data, HTTP_BTN_MENU_TIMER, sizeof(mqtt_data) - strlen(mqtt_data) -1);
 #else
-      if (devices_present) { strncat_P(mqtt_data, HTTP_BTN_MENU_TIMER, sizeof(mqtt_data)); }
+      if (devices_present) { strncat_P(mqtt_data, HTTP_BTN_MENU_TIMER, sizeof(mqtt_data) - strlen(mqtt_data) -1); }
 #endif  // USE_RULES
       break;
     case FUNC_WEB_ADD_HANDLER:

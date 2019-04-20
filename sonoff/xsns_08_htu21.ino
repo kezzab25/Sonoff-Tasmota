@@ -1,7 +1,7 @@
 /*
   xsns_08_htu21.ino - HTU21 temperature and humidity sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Heiko Krupp and Theo Arends
+  Copyright (C) 2019  Heiko Krupp and Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -133,14 +133,14 @@ void HtuHeater(uint8_t heater)
   I2cWrite8(HTU21_ADDR, HTU21_WRITEREG, current);
 }
 
-void HtuInit()
+void HtuInit(void)
 {
   HtuReset();
   HtuHeater(HTU21_HEATER_OFF);
   HtuSetResolution(HTU21_RES_RH12_T14);
 }
 
-boolean HtuRead()
+boolean HtuRead(void)
 {
   uint8_t  checksum = 0;
   uint16_t sensorval = 0;
@@ -195,7 +195,7 @@ boolean HtuRead()
 
 /********************************************************************************************/
 
-void HtuDetect()
+void HtuDetect(void)
 {
   if (htu_type) { return; }
 
@@ -229,7 +229,7 @@ void HtuDetect()
   }
 }
 
-void HtuEverySecond()
+void HtuEverySecond(void)
 {
   if (92 == (uptime %100)) {
     // 1mS
@@ -249,10 +249,9 @@ void HtuEverySecond()
 void HtuShow(boolean json)
 {
   if (htu_valid) {
-    char temperature[10];
-    char humidity[10];
-
+    char temperature[33];
     dtostrfd(htu_temperature, Settings.flag2.temperature_resolution, temperature);
+    char humidity[33];
     dtostrfd(htu_humidity, Settings.flag2.humidity_resolution, humidity);
 
     if (json) {

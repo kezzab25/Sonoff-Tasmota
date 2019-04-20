@@ -1,7 +1,7 @@
 /*
   xsns_10_bh1750.ino - BH1750 ambient light sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends
+  Copyright (C) 2019  Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ uint8_t bh1750_valid = 0;
 uint16_t bh1750_illuminance = 0;
 char bh1750_types[] = "BH1750";
 
-bool Bh1750Read()
+bool Bh1750Read(void)
 {
   if (bh1750_valid) { bh1750_valid--; }
 
@@ -53,7 +53,7 @@ bool Bh1750Read()
 
 /********************************************************************************************/
 
-void Bh1750Detect()
+void Bh1750Detect(void)
 {
   if (bh1750_type) {
     return;
@@ -72,7 +72,7 @@ void Bh1750Detect()
   }
 }
 
-void Bh1750EverySecond()
+void Bh1750EverySecond(void)
 {
   if (90 == (uptime %100)) {
     // 1mS
@@ -88,11 +88,6 @@ void Bh1750EverySecond()
     }
   }
 }
-
-#ifdef USE_WEBSERVER
-const char HTTP_SNS_ILLUMINANCE[] PROGMEM =
-  "%s{s}%s " D_ILLUMINANCE "{m}%d " D_UNIT_LUX "{e}";  // {s} = <tr><th>, {m} = </th><td>, {e} = </td></tr>
-#endif  // USE_WEBSERVER
 
 void Bh1750Show(boolean json)
 {

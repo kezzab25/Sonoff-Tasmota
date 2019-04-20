@@ -1,7 +1,7 @@
 /*
   xsns_35_Tx20.ino - La Crosse Tx20 wind sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Thomas Eckerstorfer and Theo Arends
+  Copyright (C) 2019  Thomas Eckerstorfer and Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ uint8_t tx20_wind_direction = 0;
 
 boolean tx20_available = false;
 
-void Tx20StartRead()
+void Tx20StartRead(void)
 {
   /* La Crosse TX20 Anemometer datagram every 2 seconds
    * 0-0 11011 0011 111010101111 0101 1100 000101010000 0-0 - Received pin data at 1200 uSec per bit
@@ -146,7 +146,7 @@ void Tx20StartRead()
   GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, 1 << pin[GPIO_TX20_TXD_BLACK]);
 }
 
-void Tx20Read()
+void Tx20Read(void)
 {
   if (!(uptime % TX20_RESET_VALUES)) {
     tx20_count = 0;
@@ -165,21 +165,20 @@ void Tx20Read()
   }
 }
 
-void Tx20Init() {
+void Tx20Init(void) {
   pinMode(pin[GPIO_TX20_TXD_BLACK], INPUT);
   attachInterrupt(pin[GPIO_TX20_TXD_BLACK], Tx20StartRead, RISING);
 }
 
 void Tx20Show(boolean json)
 {
-  char wind_speed_string[10];
-  char wind_speed_max_string[10];
-  char wind_speed_avg_string[10];
-  char wind_direction_string[4];
-
+  char wind_speed_string[33];
   dtostrfd(tx20_wind_speed_kmh, 2, wind_speed_string);
+  char wind_speed_max_string[33];
   dtostrfd(tx20_wind_speed_max, 2, wind_speed_max_string);
+  char wind_speed_avg_string[33];
   dtostrfd(tx20_wind_speed_avg, 2, wind_speed_avg_string);
+  char wind_direction_string[4];
   GetTextIndexed(wind_direction_string, sizeof(wind_direction_string), tx20_wind_direction, kTx20Directions);
 
   if (json) {

@@ -1,7 +1,7 @@
 /*
   xsns_05_ds18x20.ino - DS18x20 temperature sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends
+  Copyright (C) 2019  Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ uint8_t onewire_last_family_discrepancy = 0;
 bool onewire_last_device_flag = false;
 unsigned char onewire_rom_id[8] = { 0 };
 
-uint8_t OneWireReset()
+uint8_t OneWireReset(void)
 {
   uint8_t retries = 125;
 
@@ -107,7 +107,7 @@ void OneWireWriteBit(uint8_t v)
   delayMicroseconds(delay_high[v]);
 }
 
-uint8_t OneWireReadBit()
+uint8_t OneWireReadBit(void)
 {
   //noInterrupts();
   pinMode(ds18x20_pin, OUTPUT);
@@ -128,7 +128,7 @@ void OneWireWrite(uint8_t v)
   }
 }
 
-uint8_t OneWireRead()
+uint8_t OneWireRead(void)
 {
   uint8_t r = 0;
 
@@ -148,7 +148,7 @@ void OneWireSelect(const uint8_t rom[8])
   }
 }
 
-void OneWireResetSearch()
+void OneWireResetSearch(void)
 {
   onewire_last_discrepancy = 0;
   onewire_last_device_flag = false;
@@ -254,14 +254,16 @@ boolean OneWireCrc8(uint8_t *addr)
 
 /********************************************************************************************/
 
-void Ds18x20Init()
+void Ds18x20Init(void)
 {
   uint64_t ids[DS18X20_MAX_SENSORS];
 
   ds18x20_pin = pin[GPIO_DSB];
 
   OneWireResetSearch();
-  for (ds18x20_sensors = 0; ds18x20_sensors < DS18X20_MAX_SENSORS; ds18x20_sensors) {
+
+  ds18x20_sensors = 0;
+  while (ds18x20_sensors < DS18X20_MAX_SENSORS) {
     if (!OneWireSearch(ds18x20_sensor[ds18x20_sensors].address)) {
       break;
     }
@@ -289,7 +291,7 @@ void Ds18x20Init()
   AddLog(LOG_LEVEL_DEBUG);
 }
 
-void Ds18x20Convert()
+void Ds18x20Convert(void)
 {
   OneWireReset();
 #ifdef W1_PARASITE_POWER
@@ -389,7 +391,7 @@ void Ds18x20Name(uint8_t sensor)
 
 /********************************************************************************************/
 
-void Ds18x20EverySecond()
+void Ds18x20EverySecond(void)
 {
 #ifdef W1_PARASITE_POWER
   // skip access if there is still an eeprom write ongoing
@@ -424,12 +426,11 @@ void Ds18x20EverySecond()
 
 void Ds18x20Show(boolean json)
 {
-  char temperature[10];
-
   for (uint8_t i = 0; i < ds18x20_sensors; i++) {
     uint8_t index = ds18x20_sensor[i].index;
 
     if (ds18x20_sensor[index].valid) {   // Check for valid temperature
+      char temperature[33];
       dtostrfd(ds18x20_sensor[index].temperature, Settings.flag2.temperature_resolution, temperature);
 
       Ds18x20Name(i);

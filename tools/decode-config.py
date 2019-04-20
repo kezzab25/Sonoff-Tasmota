@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-VER = '2.1.0007'
+VER = '2.1.0018'
 
 """
     decode-config.py - Backup/Restore Sonoff-Tasmota configuration data
 
-    Copyright (C) 2018 Norbert Richter <nr@prsolution.eu>
+    Copyright (C) 2019 Norbert Richter <nr@prsolution.eu>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -395,6 +395,15 @@ def bitsRead(x, n=0, c=1):
     if c>0:
         x &= (1<<c)-1
     return x
+
+    
+def MqttFingerprint(value, idx=None):
+    fingerprint = ""
+    for i in value:
+        fingerprint += "{:02x} ".format(ord(i))
+    return "MqttFingerprint{} {}".format('' if idx is None else idx, fingerprint.strip())
+
+    
 # ----------------------------------------------------------------------
 # Tasmota configuration data definition
 # ----------------------------------------------------------------------
@@ -440,7 +449,7 @@ Setting_5_10_0 = {
     'syslog_level':                 ('B',   0x1AA,       (None, '0 <= $ <= 4',                  ('Logging',     '"SysLog {}".format($)')) ),
     'webserver':                    ('B',   0x1AB,       (None, '0 <= $ <= 2',                  ('Wifi',        '"WebServer {}".format($)')) ),
     'weblog_level':                 ('B',   0x1AC,       (None, '0 <= $ <= 4',                  ('Logging',     '"WebLog {}".format($)')) ),
-    'mqtt_fingerprint':             ('60s', 0x1AD,       (None, None,                           ('MQTT',        '"MqttFingerprint {}".format($)')) ),
+    'mqtt_fingerprint':             ('60s', 0x1AD,       (None, None,                           ('MQTT',        None)) ),
     'mqtt_host':                    ('33s', 0x1E9,       (None, None,                           ('MQTT',        '"MqttHost {}".format($)')) ),
     'mqtt_port':                    ('<H',  0x20A,       (None, None,                           ('MQTT',        '"MqttPort {}".format($)')) ),
     'mqtt_client':                  ('33s', 0x20C,       (None, None,                           ('MQTT',        '"MqttClient {}".format($)')) ),
@@ -449,7 +458,7 @@ Setting_5_10_0 = {
     'mqtt_topic':                   ('33s', 0x26F,       (None, None,                           ('MQTT',        '"FullTopic {}".format($)')) ),
     'button_topic':                 ('33s', 0x290,       (None, None,                           ('MQTT',        '"ButtonTopic {}".format($)')) ),
     'mqtt_grptopic':                ('33s', 0x2B1,       (None, None,                           ('MQTT',        '"GroupTopic {}".format($)')) ),
-    'mqtt_fingerprinth':            ('B',   0x2D2,       ([20], None,                           ('MQTT',        '"MqttFingerprint {}".format($)')) ),
+    'mqtt_fingerprinth':            ('B',   0x2D2,       ([20], None,                           ('MQTT',        None)) ),
     'pwm_frequency':                ('<H',  0x2E6,       (None, '$==1 or 100 <= $ <= 4000',     ('Management',  '"PwmFrequency {}".format($)')) ),
     'power':                        ({
         'power1':                   ('<L', (0x2E8,1,0),  (None, None,                           ('Main',        '"Power1 {}".format($)')) ),
@@ -578,7 +587,7 @@ Setting_5_13_1['flag'][0].update    ({
                                     })
 Setting_5_13_1.update               ({
     'baudrate':                     ('B',   0x09D,       (None, None,                           ('Serial',      '"Baudrate {}".format($)')), ('$ * 1200','$ / 1200') ),
-    'mqtt_fingerprint':             ('20s', 0x1AD,       ([2],  None,                           ('MQTT',        '"MqttFingerprint{} {}".format(#,$)')) ),
+    'mqtt_fingerprint':             ('20s', 0x1AD,       ([2],  None,                           ('MQTT',        MqttFingerprint)) ),
     'energy_power_delta':           ('B',   0x33F,       (None, None,                           ('Pow',         '"PowerDelta {}".format($)')) ),
     'light_rotation':               ('<H',  0x39E,       (None, None,                           ('Led',         '"Rotation {}".format($)')) ),
     'serial_delimiter':             ('B',   0x451,       (None, None,                           ('Serial',      '"SerialDelimiter {}".format($)')) ),
@@ -763,7 +772,75 @@ Setting_6_3_0_4['flag3'][0].update ({
         'tuya_apply_o20':           ('<L', (0x3A0,1, 4), (None, None,                           ('SetOption',   '"SetOption54 {}".format($)')) ),
                                     })
 # ======================================================================
+Setting_6_3_0_8 = copy.deepcopy(Setting_6_3_0_4)
+Setting_6_3_0_8['flag3'][0].update ({
+        'hass_short_discovery_msg': ('<L', (0x3A0,1, 5), (None, None,                           ('SetOption',   '"SetOption55 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_10 = copy.deepcopy(Setting_6_3_0_8)
+Setting_6_3_0_10['flag3'][0].update ({
+        'use_wifi_scan':            ('<L', (0x3A0,1, 6), (None, None,                           ('SetOption',   '"SetOption56 {}".format($)')) ),
+        'use_wifi_rescan':          ('<L', (0x3A0,1, 7), (None, None,                           ('SetOption',   '"SetOption57 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_11 = copy.deepcopy(Setting_6_3_0_10)
+Setting_6_3_0_11['flag3'][0].update ({
+        'receive_raw':          	('<L', (0x3A0,1, 8), (None, None,                           ('SetOption',   '"SetOption58 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_13 = copy.deepcopy(Setting_6_3_0_11)
+Setting_6_3_0_13['flag3'][0].update ({
+        'hass_tele_on_power':       ('<L', (0x3A0,1, 9), (None, None,                           ('SetOption',   '"SetOption59 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_14 = copy.deepcopy(Setting_6_3_0_13)
+Setting_6_3_0_14['flag2'][0].update ({
+        'calc_resolution':          ('<L', (0x5BC,3, 6), (None, '0 <= $ <= 7',                  ('Management',  '"CalcRes {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_15 = copy.deepcopy(Setting_6_3_0_14)
+Setting_6_3_0_15['flag3'][0].update ({
+        'sleep_normal':             ('<L', (0x3A0,1,10), (None, None,                           ('SetOption',   '"SetOption60 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_3_0_16 = copy.deepcopy(Setting_6_3_0_15)
+Setting_6_3_0_16['mcp230xx_config'][0].update ({
+        'int_retain_flag':          ('<L', (0x6F6,1,12), (None, None,                           ('MCP230xx',    None)) ),
+                                    })
+Setting_6_3_0_16['flag3'][0].update ({
+        'button_switch_force_local':('<L', (0x3A0,1,11), (None, None,                           ('SetOption',   '"SetOption61 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_4_0_2 = copy.deepcopy(Setting_6_3_0_16)
+Setting_6_4_0_2['flag3'][0].pop('hass_short_discovery_msg',None)
+# ======================================================================
+Setting_6_4_1_4 = copy.deepcopy(Setting_6_4_0_2)
+Setting_6_4_1_4['flag3'][0].update ({
+        'mdns_enabled':             ('<L', (0x3A0,1, 5), (None, None,                           ('SetOption',   '"SetOption55 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_4_1_7 = copy.deepcopy(Setting_6_4_1_4)
+Setting_6_4_1_7['flag3'][0].update ({
+        'no_pullup':                ('<L', (0x3A0,1,12), (None, None,                           ('SetOption',   '"SetOption62 {}".format($)')) ),
+                                    })
+# ======================================================================
+Setting_6_4_1_8 = copy.deepcopy(Setting_6_4_1_7)
+Setting_6_4_1_8['flag3'][0].update ({
+        'split_interlock':          ('<L', (0x3A0,1,13), (None, None,                           ('SetOption',   '"SetOption63 {}".format($)')) ),
+                                    })
+# ======================================================================
 Settings = [
+            (0x6040108, 0xe00, Setting_6_4_1_8),
+            (0x6040107, 0xe00, Setting_6_4_1_7),
+            (0x6040104, 0xe00, Setting_6_4_1_4),
+            (0x6040002, 0xe00, Setting_6_4_0_2),
+            (0x6030010, 0xe00, Setting_6_3_0_16),
+            (0x603000F, 0xe00, Setting_6_3_0_15),
+            (0x603000E, 0xe00, Setting_6_3_0_14),
+            (0x603000D, 0xe00, Setting_6_3_0_13),
+            (0x603000B, 0xe00, Setting_6_3_0_11),
+            (0x603000A, 0xe00, Setting_6_3_0_10),
+            (0x6030008, 0xe00, Setting_6_3_0_8),
             (0x6030004, 0xe00, Setting_6_3_0_4),
             (0x6030002, 0xe00, Setting_6_3_0_2),
             (0x6030000, 0xe00, Setting_6_3_0),
@@ -1013,47 +1090,40 @@ def GetFileType(filename):
     try:
         isfile = os.path.isfile(filename)
         try:
-            f = open(filename, "r")
-            try:
-                # try reading as json
-                inputjson = json.load(f)
-                if 'header' in inputjson:
-                    filetype = FileType.JSON
-                else:
-                    filetype = FileType.INCOMPLETE_JSON
-            except ValueError:
-                filetype = FileType.INVALID_JSON
-                # not a valid json, get filesize and compare it with all possible sizes
+            with open(filename, "r") as f:
                 try:
-                    size = os.path.getsize(filename)
-                except:
-                    filetype = FileType.UNKNOWN
-                sizes = GetTemplateSizes()
-
-                # size is one of a dmp file size
-                if size in sizes:
-                    filetype = FileType.DMP
-                elif (size - ((len(hex(BINARYFILE_MAGIC))-2)/2)) in sizes:
-                    # check if the binary file has the magic header
+                    # try reading as json
+                    inputjson = json.load(f)
+                    if 'header' in inputjson:
+                        filetype = FileType.JSON
+                    else:
+                        filetype = FileType.INCOMPLETE_JSON
+                except ValueError:
+                    filetype = FileType.INVALID_JSON
+                    # not a valid json, get filesize and compare it with all possible sizes
                     try:
-                        inputfile = open(filename, "rb")
-                        inputbin = inputfile.read()
-                        inputfile.close()
+                        size = os.path.getsize(filename)
+                    except:
+                        filetype = FileType.UNKNOWN
+                    sizes = GetTemplateSizes()
+
+                    # size is one of a dmp file size
+                    if size in sizes:
+                        filetype = FileType.DMP
+                    elif (size - ((len(hex(BINARYFILE_MAGIC))-2)/2)) in sizes:
+                        # check if the binary file has the magic header
+                        with open(filename, "rb") as inputfile:
+                            inputbin = inputfile.read()
                         if struct.unpack_from('<L', inputbin, 0)[0] == BINARYFILE_MAGIC:
                             filetype = FileType.BIN
                         else:
                             filetype = FileType.INVALID_BIN
-
-                    except:
-                        pass
-                # ~ else:
-                    # ~ filetype = FileType.UNKNOWN
-            finally:
-                f.close()
         except:
             filetype = FileType.FILE_NOT_FOUND
+            pass
     except:
         filetype = FileType.FILE_NOT_FOUND
+        pass
 
     return filetype
 
@@ -1123,14 +1193,7 @@ def MakeFilename(filename, filetype, configmapping):
         if device_hostname is None:
             device_hostname = ''
 
-    filename = filename.replace('@v', config_version)
-    filename = filename.replace('@f', config_friendlyname )
-    filename = filename.replace('@h', config_hostname )
-    filename = filename.replace('@H', device_hostname )
-        
-
     dirname = basename = ext = ''
-    name = filename
 
     # split file parts
     dirname = os.path.normpath(os.path.dirname(filename))
@@ -1161,6 +1224,11 @@ def MakeFilename(filename, filetype, configmapping):
         filename = os.path.join(dirname, name_ext)
     except:
         pass
+
+    filename = filename.replace('@v', config_version)
+    filename = filename.replace('@f', config_friendlyname )
+    filename = filename.replace('@h', config_hostname )
+    filename = filename.replace('@H', device_hostname )
 
     return filename
 
@@ -1203,9 +1271,8 @@ def LoadTasmotaConfig(filename):
     if not os.path.isfile(filename):    # check file exists
         exit(ExitCode.FILE_NOT_FOUND, "File '{}' not found".format(filename),line=inspect.getlineno(inspect.currentframe()))
     try:
-        tasmotafile = open(filename, "rb")
-        encode_cfg = tasmotafile.read()
-        tasmotafile.close()
+        with open(filename, "rb") as tasmotafile:
+            encode_cfg = tasmotafile.read()
     except Exception, e:
         exit(e[0], "'{}' {}".format(filename, e[1]),line=inspect.getlineno(inspect.currentframe()))
 
@@ -1504,7 +1571,7 @@ def GetFieldDef(fielddef, fields="format, addrdef, baseaddr, bits, bitshift, dat
                 if group is not None and not isinstance(group, (str, unicode)):
                     print >> sys.stderr, 'wrong <group> {} in <fielddef> {}'.format(group, fielddef)
                     raise SyntaxError('<fielddef> error')
-                if tasmotacmnd is not None and not isinstance(tasmotacmnd, (str, unicode)):
+                if tasmotacmnd is not None and not callable(tasmotacmnd) and not isinstance(tasmotacmnd, (str, unicode)):
                     print >> sys.stderr, 'wrong <tasmotacmnd> {} in <fielddef> {}'.format(tasmotacmnd, fielddef)
                     raise SyntaxError('<fielddef> error')
             else:
@@ -1607,7 +1674,7 @@ def CmndConverter(valuemapping, value, idx, fielddef):
         else:
             result = value
 
-    if tasmotacmnd is not None and len(tasmotacmnd) > 0:
+    if tasmotacmnd is not None and (callable(tasmotacmnd) or len(tasmotacmnd) > 0):
         if idx is not None:
             idx += 1
         if isinstance(tasmotacmnd, str): # evaluate strings
@@ -2026,9 +2093,8 @@ def SetField(dobj, fieldname, fielddef, restore, addroffset=0, filename=""):
             value = ReadWriteConverter(restore.encode(STR_ENCODING), fielddef, read=False)
             err = "string length exceeding"
             if value is not None:
-                # be aware 0 byte at end of string (str must be < max, not <= max)
                 _max -= 1
-                valid = _min <= len(value) < _max
+                valid = _min <= len(value) <= _max
             else:
                 skip = True
                 valid = True
@@ -2316,7 +2382,6 @@ def Backup(backupfile, backupfileformat, encode_cfg, decode_cfg, configmapping):
         config data mapppings
     """
 
-    backupfileformat = args.backupfileformat
     name, ext = os.path.splitext(backupfile)
     if ext.lower() == '.'+FileType.BIN.lower():
         backupfileformat = FileType.BIN
@@ -2333,12 +2398,10 @@ def Backup(backupfile, backupfileformat, encode_cfg, decode_cfg, configmapping):
         if args.verbose:
             message("Writing backup file '{}' ({} format)".format(backup_filename, fileformat), typ=LogType.INFO)
         try:
-            backupfp = open(backup_filename, "wb")
-            backupfp.write(encode_cfg)
+            with open(backup_filename, "wb") as backupfp:
+                backupfp.write(encode_cfg)
         except Exception, e:
             exit(e[0], "'{}' {}".format(backup_filename, e[1]),line=inspect.getlineno(inspect.currentframe()))
-        finally:
-            backupfp.close()
 
     # binary format
     elif backupfileformat.lower() == FileType.BIN.lower():
@@ -2347,14 +2410,11 @@ def Backup(backupfile, backupfileformat, encode_cfg, decode_cfg, configmapping):
         if args.verbose:
             message("Writing backup file '{}' ({} format)".format(backup_filename, fileformat), typ=LogType.INFO)
         try:
-            backupfp = open(backup_filename, "wb")
-            magic = BINARYFILE_MAGIC
-            backupfp.write(struct.pack('<L',magic))
-            backupfp.write(decode_cfg)
+            with open(backup_filename, "wb") as backupfp:
+                backupfp.write(struct.pack('<L',BINARYFILE_MAGIC))
+                backupfp.write(decode_cfg)
         except Exception, e:
             exit(e[0], "'{}' {}".format(backup_filename, e[1]),line=inspect.getlineno(inspect.currentframe()))
-        finally:
-            backupfp.close()
 
     # JSON format
     elif backupfileformat.lower() == FileType.JSON.lower():
@@ -2363,12 +2423,10 @@ def Backup(backupfile, backupfileformat, encode_cfg, decode_cfg, configmapping):
         if args.verbose:
             message("Writing backup file '{}' ({} format)".format(backup_filename, fileformat), typ=LogType.INFO)
         try:
-            backupfp = open(backup_filename, "w")
-            json.dump(configmapping, backupfp, sort_keys=args.jsonsort, indent=None if args.jsonindent < 0 else args.jsonindent, separators=(',', ':') if args.jsoncompact else (', ', ': ') )
+            with open(backup_filename, "w") as backupfp:
+                json.dump(configmapping, backupfp, sort_keys=args.jsonsort, indent=None if args.jsonindent < 0 else args.jsonindent, separators=(',', ':') if args.jsoncompact else (', ', ': ') )
         except Exception, e:
             exit(e[0], "'{}' {}".format(backup_filename, e[1]),line=inspect.getlineno(inspect.currentframe()))
-        finally:
-            backupfp.close()
 
     if args.verbose:
         srctype = 'device'
@@ -2379,12 +2437,14 @@ def Backup(backupfile, backupfileformat, encode_cfg, decode_cfg, configmapping):
         message("Backup successful from {} '{}' to file '{}' ({} format)".format(srctype, src, backup_filename, fileformat), typ=LogType.INFO)
 
 
-def Restore(restorefile, encode_cfg, decode_cfg, configmapping):
+def Restore(restorefile, backupfileformat, encode_cfg, decode_cfg, configmapping):
     """
     Restore from file
 
     @param encode_cfg:
         binary config data (encrypted)
+    @param backupfileformat:
+        Backup file format
     @param decode_cfg:
         binary config data (decrypted)
     @param configmapping:
@@ -2393,16 +2453,22 @@ def Restore(restorefile, encode_cfg, decode_cfg, configmapping):
 
     new_encode_cfg = None
 
-    restorefilename = MakeFilename(restorefile, None, configmapping)
+    restorefileformat = None
+    if backupfileformat.lower() == 'bin':
+        restorefileformat = FileType.BIN
+    elif backupfileformat.lower() == 'dmp':
+        restorefileformat = FileType.DMP
+    elif backupfileformat.lower() == 'json':
+        restorefileformat = FileType.JSON
+    restorefilename = MakeFilename(restorefile, restorefileformat, configmapping)
     filetype = GetFileType(restorefilename)
 
     if filetype == FileType.DMP:
         if args.verbose:
             message("Reading restore file '{}' (Tasmota format)".format(restorefilename), typ=LogType.INFO)
         try:
-            restorefp = open(restorefilename, "rb")
-            new_encode_cfg = restorefp.read()
-            restorefp.close()
+            with open(restorefilename, "rb") as restorefp:
+                new_encode_cfg = restorefp.read()
         except Exception, e:
             exit(e[0], "'{}' {}".format(restorefilename, e[1]),line=inspect.getlineno(inspect.currentframe()))
 
@@ -2410,9 +2476,8 @@ def Restore(restorefile, encode_cfg, decode_cfg, configmapping):
         if args.verbose:
             message("Reading restore file '{}' (binary format)".format(restorefilename), typ=LogType.INFO)
         try:
-            restorefp = open(restorefilename, "rb")
-            restorebin = restorefp.read()
-            restorefp.close()
+            with open(restorefilename, "rb") as restorefp:
+                restorebin = restorefp.read()
         except Exception, e:
             exit(e[0], "'{}' {}".format(restorefilename, e[1]),line=inspect.getlineno(inspect.currentframe()))
         header = struct.unpack_from('<L', restorebin, 0)[0]
@@ -2424,12 +2489,10 @@ def Restore(restorefile, encode_cfg, decode_cfg, configmapping):
         if args.verbose:
             message("Reading restore file '{}' (JSON format)".format(restorefilename), typ=LogType.INFO)
         try:
-            restorefp = open(restorefilename, "r")
-            jsonconfig = json.load(restorefp)
+            with open(restorefilename, "r") as restorefp:
+                jsonconfig = json.load(restorefp)
         except ValueError as e:
             exit(ExitCode.JSON_READ_ERROR, "File '{}' invalid JSON: {}".format(restorefilename, e), line=inspect.getlineno(inspect.currentframe()))
-        finally:
-            restorefp.close()
         # process json config to binary config
         new_decode_cfg = Mapping2Bin(decode_cfg, jsonconfig, restorefilename)
         new_encode_cfg = DecryptEncrypt(new_decode_cfg)
@@ -2461,14 +2524,12 @@ def Restore(restorefile, encode_cfg, decode_cfg, configmapping):
                 if args.verbose:
                     message("Write new data to file '{}' using restore file '{}'".format(args.tasmotafile, restorefilename), typ=LogType.INFO)
                 try:
-                    outputfile = open(args.tasmotafile, "wb")
-                    outputfile.write(new_encode_cfg)
+                    with open(args.tasmotafile, "wb") as outputfile:
+                        outputfile.write(new_encode_cfg)
                 except Exception, e:
                     exit(e[0], "'{}' {}".format(args.tasmotafile, e[1]),line=inspect.getlineno(inspect.currentframe()))
-                finally:
-                    outputfile.close()
-                    if args.verbose:
-                        message("Restore successful to file '{}' using restore file '{}'".format(args.tasmotafile, restorefilename), typ=LogType.INFO)
+                if args.verbose:
+                    message("Restore successful to file '{}' using restore file '{}'".format(args.tasmotafile, restorefilename), typ=LogType.INFO)
 
         else:
             global exitcode
@@ -2762,7 +2823,7 @@ if __name__ == "__main__":
 
     # restore from file
     if args.restorefile is not None:
-        Restore(args.restorefile, encode_cfg, decode_cfg, configmapping)
+        Restore(args.restorefile, args.backupfileformat, encode_cfg, decode_cfg, configmapping)
 
     # json screen output
     if (args.backupfile is None and args.restorefile is None) or args.output:

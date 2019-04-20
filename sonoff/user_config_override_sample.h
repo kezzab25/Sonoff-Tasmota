@@ -1,7 +1,7 @@
 /*
   user_config_override.h - user configuration overrides my_user_config.h for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends
+  Copyright (C) 2019  Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ Examples :
 
 #ifdef MY_IP
 #undef  WIFI_IP_ADDRESS
-#define WIFI_IP_ADDRESS   MY_IP                  // Set to 0.0.0.0 for using DHCP or IP address
+#define WIFI_IP_ADDRESS   MY_IP                  // Set to 0.0.0.0 for using DHCP or enter a static IP address
 #endif
 
 #ifdef MY_GW

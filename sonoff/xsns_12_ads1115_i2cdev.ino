@@ -1,7 +1,7 @@
 /*
   xsns_12_ads1115.ino - ADS1x15 A/D Converter support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Stefan Bode and Theo Arends
+  Copyright (C) 2019  Stefan Bode and Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ int16_t Ads1115GetConversion(byte channel)
 
 /********************************************************************************************/
 
-void Ads1115Detect()
+void Ads1115Detect(void)
 {
   if (ads1115_type) {
     return;

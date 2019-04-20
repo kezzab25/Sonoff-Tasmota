@@ -1,7 +1,7 @@
 /*
   xsns_31_ccs811.ino - CCS811 gas and air quality sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Gerhard Mutz and Theo Arends
+  Copyright (C) 2019  Gerhard Mutz and Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ uint8_t ecnt = 0;
 /********************************************************************************************/
 #define EVERYNSECONDS 5
 
-void CCS811Update()  // Perform every n second
+void CCS811Update(void)  // Perform every n second
 {
   tcnt++;
   if (tcnt >= EVERYNSECONDS) {

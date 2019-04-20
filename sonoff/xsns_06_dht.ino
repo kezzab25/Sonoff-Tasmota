@@ -1,7 +1,7 @@
 /*
   xsns_06_dht.ino - DHTxx, AM23xx and SI7021 temperature and humidity sensor support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends
+  Copyright (C) 2019  Theo Arends
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ struct DHTSTRUCT {
   float    h = NAN;
 } Dht[DHT_MAX_SENSORS];
 
-void DhtReadPrep()
+void DhtReadPrep(void)
 {
   for (byte i = 0; i < dht_sensors; i++) {
     digitalWrite(Dht[i].pin, HIGH);
@@ -177,7 +177,7 @@ boolean DhtSetup(byte pin, byte type)
 
 /********************************************************************************************/
 
-void DhtInit()
+void DhtInit(void)
 {
   dht_max_cycles = microsecondsToClockCycles(1000);  // 1 millisecond timeout for reading pulses from DHT sensor.
 
@@ -192,7 +192,7 @@ void DhtInit()
   }
 }
 
-void DhtEverySecond()
+void DhtEverySecond(void)
 {
   if (uptime &1) {
     // <1mS
@@ -207,11 +207,10 @@ void DhtEverySecond()
 
 void DhtShow(boolean json)
 {
-  char temperature[10];
-  char humidity[10];
-
   for (byte i = 0; i < dht_sensors; i++) {
+    char temperature[33];
     dtostrfd(Dht[i].t, Settings.flag2.temperature_resolution, temperature);
+    char humidity[33];
     dtostrfd(Dht[i].h, Settings.flag2.humidity_resolution, humidity);
 
     if (json) {

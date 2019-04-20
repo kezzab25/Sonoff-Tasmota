@@ -1,7 +1,7 @@
 /*
   xdsp_02_ssd1306.ino - Display Oled ssd1306 support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends and Adafruit
+  Copyright (C) 2019  Theo Arends and Adafruit
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ uint8_t ssd1306_font_y = OLED_FONT_HEIGTH;
 
 /*********************************************************************************************/
 
-void Ssd1306InitMode()
+void Ssd1306InitMode(void)
 {
   oled->setRotation(Settings.display_rotate);  // 0
   oled->invertDisplay(false);
@@ -72,7 +72,7 @@ void Ssd1306Init(uint8_t mode)
   }
 }
 
-void Ssd1306InitDriver()
+void Ssd1306InitDriver(void)
 {
   if (!Settings.display_model) {
     if (I2cDevice(OLED_ADDRESS1)) {
@@ -97,7 +97,7 @@ void Ssd1306InitDriver()
   }
 }
 
-void Ssd1306Clear()
+void Ssd1306Clear(void)
 {
   oled->clearDisplay();
   oled->setCursor(0, 0);
@@ -123,7 +123,7 @@ void Ssd1306DisplayOnOff(uint8_t on)
   }
 }
 
-void Ssd1306OnOff()
+void Ssd1306OnOff(void)
 {
   Ssd1306DisplayOnOff(disp_power);
   oled->display();
@@ -133,7 +133,7 @@ void Ssd1306OnOff()
 
 #ifdef USE_DISPLAY_MODES1TO5
 
-void Ssd1306PrintLog()
+void Ssd1306PrintLog(void)
 {
   disp_refresh--;
   if (!disp_refresh) {
@@ -163,7 +163,7 @@ void Ssd1306PrintLog()
   }
 }
 
-void Ssd1306Time()
+void Ssd1306Time(void)
 {
   char line[12];
 
@@ -177,7 +177,7 @@ void Ssd1306Time()
   oled->display();
 }
 
-void Ssd1306Refresh()  // Every second
+void Ssd1306Refresh(void)  // Every second
 {
   if (Settings.display_mode) {  // Mode 0 is User text
     switch (Settings.display_mode) {

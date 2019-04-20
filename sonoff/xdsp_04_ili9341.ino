@@ -1,7 +1,7 @@
 /*
   xdsp_04_ili9341.ino - Display Tft Ili9341 support for Sonoff-Tasmota
 
-  Copyright (C) 2018  Theo Arends and Adafruit
+  Copyright (C) 2019  Theo Arends and Adafruit
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ uint16_t tft_scroll;
 
 /*********************************************************************************************/
 
-void Ili9341InitMode()
+void Ili9341InitMode(void)
 {
   tft->setRotation(Settings.display_rotate);  // 0
   tft->invertDisplay(0);
@@ -77,7 +77,7 @@ void Ili9341Init(uint8_t mode)
   }
 }
 
-void Ili9341InitDriver()
+void Ili9341InitDriver(void)
 {
   if (!Settings.display_model) {
     Settings.display_model = XDSP_04;
@@ -97,7 +97,7 @@ void Ili9341InitDriver()
   }
 }
 
-void Ili9341Clear()
+void Ili9341Clear(void)
 {
   tft->fillScreen(ILI9341_BLACK);
   tft->setCursor(0, 0);
@@ -128,7 +128,7 @@ void Ili9341DisplayOnOff(uint8_t on)
   }
 }
 
-void Ili9341OnOff()
+void Ili9341OnOff(void)
 {
   Ili9341DisplayOnOff(disp_power);
 }
@@ -137,7 +137,7 @@ void Ili9341OnOff()
 
 #ifdef USE_DISPLAY_MODES1TO5
 
-void Ili9341PrintLog()
+void Ili9341PrintLog(void)
 {
   disp_refresh--;
   if (!disp_refresh) {
@@ -184,7 +184,7 @@ void Ili9341PrintLog()
   }
 }
 
-void Ili9341Refresh()  // Every second
+void Ili9341Refresh(void)  // Every second
 {
   if (Settings.display_mode) {  // Mode 0 is User text
     char tftdt[Settings.display_cols[0] +1];
